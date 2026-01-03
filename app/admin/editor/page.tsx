@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Template, TemplateField } from '@/lib/storage';
+import { Template, TemplateField, getTemplates, saveTemplates } from '@/lib/storage';
 
 function TemplateEditorContent() {
     const router = useRouter();
@@ -28,23 +28,21 @@ function TemplateEditorContent() {
 
     useEffect(() => {
         if (id) {
-            fetch('/api/templates')
-                .then(res => res.json())
-                .then((data: Template[]) => {
-                    const template = data.find(t => t.id === id);
-                    if (template) {
-                        setName(template.name);
-                        setImage(template.imageUrl);
-                        setFields(template.fields);
+            // Load from localStorage
+            const templates = getTemplates();
+            const template = templates.find(t => t.id === id);
+            if (template) {
+                setName(template.name);
+                setImage(template.imageUrl);
+                setFields(template.fields);
 
-                        const img = new Image();
-                        img.src = template.imageUrl;
-                        img.onload = () => {
-                            imgRef.current = img;
-                            draw();
-                        };
-                    }
-                });
+                const img = new Image();
+                img.src = template.imageUrl;
+                img.onload = () => {
+                    imgRef.current = img;
+                    draw();
+                };
+            }
         }
     }, [id]);
 
@@ -271,14 +269,16 @@ function TemplateEditorContent() {
         };
 
         try {
-            const res = await fetch('/api/templates', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(template),
-            });
-            if (res.ok) {
-                router.push('/admin');
+            // Save to localStorage
+            const templates = getTemplates();
+            const index = templates.findIndex(t => t.id === template.id);
+            if (index !== -1) {
+                templates[index] = template;
+            } else {
+                templates.push(template);
             }
+            saveTemplates(templates);
+            router.push('/admin');
         } catch (err) {
             alert('Save failed');
         }

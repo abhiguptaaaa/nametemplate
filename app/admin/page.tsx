@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Template } from '@/lib/storage';
+import { Template, getTemplates, saveTemplates } from '@/lib/storage';
 
 export default function AdminDashboard() {
     const [templates, setTemplates] = useState<Template[]>([]);
@@ -24,12 +24,10 @@ export default function AdminDashboard() {
     }, []);
 
     const loadTemplates = () => {
-        fetch('/api/templates')
-            .then(res => res.json())
-            .then(data => {
-                setTemplates(data);
-                setLoading(false);
-            });
+        // Load from localStorage instead of API
+        const storedTemplates = getTemplates();
+        setTemplates(storedTemplates);
+        setLoading(false);
     };
 
     const handleLogin = (e: React.FormEvent) => {

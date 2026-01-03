@@ -1,8 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
-
-const DATA_PATH = path.join(process.cwd(), 'data', 'templates.json');
-
 export interface TemplateField {
   id: string;
   label: string;
@@ -22,30 +17,38 @@ export interface Template {
   fields: TemplateField[];
 }
 
-export async function getTemplates(): Promise<Template[]> {
+// Client-side storage using localStorage
+export function getTemplates(): Template[] {
+  if (typeof window === 'undefined') return [];
   try {
-    const data = await fs.readFile(DATA_PATH, 'utf-8');
-    return JSON.parse(data);
+    const data = localStorage.getItem('templates');
+    return data ? JSON.parse(data) : [];
   } catch (error) {
+    console.error('Error reading templates:', error);
     return [];
   }
 }
 
-export async function saveTemplates(templates: Template[]): Promise<void> {
-  await fs.writeFile(DATA_PATH, JSON.stringify(templates, null, 2));
+export function saveTemplates(templates: Template[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('templates', JSON.stringify(templates));
+  } catch (error) {
+    console.error('Error saving templates:', error);
+  }
 }
 
-export async function addTemplate(template: Template): Promise<void> {
-  const templates = await getTemplates();
+export function addTemplate(template: Template): void {
+  const templates = getTemplates();
   templates.push(template);
-  await saveTemplates(templates);
+  saveTemplates(templates);
 }
 
-export async function updateTemplate(updatedTemplate: Template): Promise<void> {
-  const templates = await getTemplates();
+export function updateTemplate(updatedTemplate: Template): void {
+  const templates = getTemplates();
   const index = templates.findIndex(t => t.id === updatedTemplate.id);
   if (index !== -1) {
     templates[index] = updatedTemplate;
-    await saveTemplates(templates);
+    saveTemplates(templates);
   }
 }

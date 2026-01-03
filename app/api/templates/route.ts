@@ -1,27 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTemplates, saveTemplates, Template } from '@/lib/storage';
 
+// Since we're using client-side localStorage, this API route just returns an empty array
+// The actual data is stored in the browser's localStorage
 export async function GET() {
-    const templates = await getTemplates();
-    return NextResponse.json(templates);
+    return NextResponse.json([]);
 }
 
 export async function POST(req: NextRequest) {
-    try {
-        const template: Template = await req.json();
-        const templates = await getTemplates();
-
-        const index = templates.findIndex(t => t.id === template.id);
-        if (index !== -1) {
-            templates[index] = template;
-        } else {
-            templates.push(template);
-        }
-
-        await saveTemplates(templates);
-        return NextResponse.json({ success: true, template });
-    } catch (error) {
-        console.error('Save template error:', error);
-        return NextResponse.json({ error: 'Failed to save template' }, { status: 500 });
-    }
+    // Client-side storage - this endpoint is not used
+    return NextResponse.json({ success: true });
 }
