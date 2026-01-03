@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getGlobalTemplates, saveGlobalTemplate } from '@/lib/db';
+import { Template } from '@/lib/storage';
 
-// Since we're using client-side localStorage, this API route just returns an empty array
-// The actual data is stored in the browser's localStorage
+// Fetch all shared templates from Vercel KV
 export async function GET() {
-    return NextResponse.json([]);
+    const templates = await getGlobalTemplates();
+    return NextResponse.json(templates);
 }
 
+// Admin saves a shared template
 export async function POST(req: NextRequest) {
-    // Client-side storage - this endpoint is not used
-    return NextResponse.json({ success: true });
+    try {
+        const template: Template = await req.json();
+        await saveGlobalTemplate(template);
+        return NextResponse.json({ success: true, template });
+    } catch (error) {
+        console.error('API Error:', error);
+        return NextResponse.json({ error: 'Failed to save template' }, { status: 500 });
+    }
 }

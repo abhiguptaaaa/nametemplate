@@ -17,6 +17,12 @@ export interface Template {
   fields: TemplateField[];
 }
 
+export interface CustomFont {
+  id: string;
+  name: string;
+  dataUrl: string; // Base64 woff/ttf
+}
+
 // Client-side storage using localStorage
 export function getTemplates(): Template[] {
   if (typeof window === 'undefined') return [];

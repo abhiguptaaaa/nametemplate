@@ -24,10 +24,17 @@ export default function AdminDashboard() {
     }, []);
 
     const loadTemplates = () => {
-        // Load from localStorage instead of API
-        const storedTemplates = getTemplates();
-        setTemplates(storedTemplates);
-        setLoading(false);
+        // Load from Server (Shared DB)
+        fetch('/api/templates')
+            .then(res => res.json())
+            .then(data => {
+                setTemplates(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Failed to load templates:', err);
+                setLoading(false);
+            });
     };
 
     const handleLogin = (e: React.FormEvent) => {
