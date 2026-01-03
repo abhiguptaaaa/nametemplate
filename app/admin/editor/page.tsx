@@ -505,7 +505,7 @@ function TemplateEditorContent() {
                 </div>
             </header>
 
-            <div className="relative z-10 max-w-[1800px] mx-auto p-4 lg:p-6 h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="relative z-10 max-w-[1800px] mx-auto p-4 lg:p-6 lg:h-[calc(100vh-64px)] min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* Left: Canvas Area */}
                 <div className="lg:col-span-8 flex flex-col h-full gap-4">
@@ -519,7 +519,7 @@ function TemplateEditorContent() {
                         />
                     </div>
 
-                    <div className="flex-1 bg-white/50 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm relative overflow-hidden flex items-center justify-center p-8 group">
+                    <div className="flex-1 bg-white/50 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm relative overflow-hidden flex items-center justify-center p-8 group min-h-[50vh] lg:min-h-0">
                         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
 
                         {/* Image Loading Spinner */}
