@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Template, TemplateField } from '@/lib/storage';
 
-export default function TemplateEditor() {
+function TemplateEditorContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const id = searchParams.get('id');
@@ -413,5 +413,13 @@ export default function TemplateEditor() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function TemplateEditor() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center">Loading editor...</div>}>
+            <TemplateEditorContent />
+        </Suspense>
     );
 }
