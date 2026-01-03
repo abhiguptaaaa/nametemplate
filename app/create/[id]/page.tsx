@@ -2,7 +2,15 @@
 
 import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { Template, TemplateField, CustomFont } from '@/lib/storage';
+import { Template, CustomFont } from '@/lib/storage';
+
+const BackgroundEffects = () => (
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob" />
+        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-200/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob animation-delay-2000" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-cyan-100/40 rounded-full blur-[80px] opacity-50 mix-blend-multiply animate-blob animation-delay-4000" />
+    </div>
+);
 
 export default function CreateTemplate({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -23,7 +31,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             .then(res => res.json())
             .then((fonts: CustomFont[]) => {
                 setCustomFonts(fonts);
-                // Inject styles
                 const styleId = 'dynamic-fonts';
                 let styleEl = document.getElementById(styleId);
                 if (!styleEl) {
@@ -56,7 +63,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     if (savedDraft) {
                         try {
                             const parsed = JSON.parse(savedDraft);
-                            // Only restore valid field IDs
                             t.fields.forEach(f => {
                                 if (parsed[f.id]) initialValues[f.id] = parsed[f.id];
                             });
@@ -81,13 +87,11 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const draw = () => {
         const canvas = canvasRef.current;
         if (!canvas || !imgRef.current || !template) return;
-
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
         canvas.width = imgRef.current.width;
         canvas.height = imgRef.current.height;
-
         ctx.drawImage(imgRef.current, 0, 0);
 
         template.fields.forEach(field => {
@@ -104,7 +108,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             if (field.alignment === 'center') drawX = field.x + field.width / 2;
             if (field.alignment === 'right') drawX = field.x + field.width;
 
-            // Match Editor Logic (no wrap, just print)
             ctx.fillText(text, drawX, field.y, field.width);
         });
     };
@@ -120,7 +123,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const handleDownload = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const link = document.createElement('a');
         link.download = `${template?.name || 'personalized'}-image.png`;
         link.href = canvas.toDataURL('image/png');
@@ -131,7 +133,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
             <div className="flex flex-col items-center gap-4">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-                <p className="text-slate-500 font-medium">Loading Editor...</p>
+                <p className="text-slate-500 font-medium">Loading...</p>
             </div>
         </div>
     );
@@ -139,77 +141,90 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     if (!template) return null;
 
     return (
-        <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
+        <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-500/10 selection:text-indigo-700">
+            <BackgroundEffects />
+
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 sticky top-0 z-50 shadow-sm">
-                <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+            <header className="fixed w-full top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60">
+                <div className="max-w-[1600px] mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => router.push('/')}
-                            className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 p-2 rounded-full transition-all"
+                            className="p-2 -ml-2 text-slate-500 hover:text-slate-900 hover:bg-black/5 rounded-full transition-all"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </button>
-                        <div>
-                            <h1 className="text-lg font-bold text-slate-900 truncate max-w-[150px] sm:max-w-xs">{template.name}</h1>
-                            <p className="text-xs text-slate-500 hidden sm:block">Edit and Download</p>
+                        <div className="flex flex-col">
+                            <h1 className="text-lg md:text-xl font-bold text-slate-900 leading-none mb-1">{template.name}</h1>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-green-100/80 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-green-200 uppercase tracking-wide">Live Editor</span>
+                            </div>
                         </div>
                     </div>
                     <button
                         onClick={handleDownload}
-                        className="bg-indigo-600 text-white font-bold px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 flex items-center gap-2 text-sm md:text-base"
+                        className="bg-slate-900 hover:bg-indigo-600 text-white font-medium px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/30 transition-all flex items-center gap-2 active:scale-95"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        <span className="hidden sm:inline">Download Image</span>
-                        <span className="sm:hidden">Save</span>
+                        <span>Download</span>
                     </button>
                 </div>
             </header>
 
-            {/* Main Content - Mobile Friendly Grid order */}
-            <main className="flex-1 max-w-[1600px] mx-auto w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Main Content */}
+            <main className="relative z-10 pt-24 md:pt-28 pb-12 px-4 md:px-6 max-w-[1600px] mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                {/* Left: Input Panel (Order 2 on mobile, Order 1 on Desktop) */}
-                <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-6 order-2 lg:order-1 w-full lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto custom-scrollbar">
-                    <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100">
-                        <h2 className="text-2xl font-bold mb-1 text-slate-900">Customize</h2>
-                        <p className="text-slate-500 text-sm mb-8">Fill in the details below.</p>
+                    {/* Left Panel: Inputs */}
+                    <div className="lg:col-span-4 xl:col-span-3 order-2 lg:order-1 flex flex-col gap-6 lg:sticky lg:top-28">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 p-6 md:p-8">
+                            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 text-sm">✍️</span>
+                                Personalize
+                            </h2>
+                            <div className="space-y-5">
+                                {template.fields.map(field => (
+                                    <div key={field.id} className="group relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg className="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={fieldValues[field.id]}
+                                            onChange={(e) => setFieldValues({ ...fieldValues, [field.id]: e.target.value })}
+                                            className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-all shadow-sm"
+                                            placeholder={`Enter ${field.label}`}
+                                        />
+                                        <label className="absolute -top-2 left-3 inline-block bg-white px-1 text-xs font-bold text-slate-500 group-focus-within:text-indigo-600 transition-colors">
+                                            {field.label}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
-                        <div className="space-y-6">
-                            {template.fields.map(field => (
-                                <div key={field.id} className="group">
-                                    <label className="block text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest pl-1">
-                                        {field.label}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={fieldValues[field.id]}
-                                        onChange={(e) => setFieldValues({ ...fieldValues, [field.id]: e.target.value })}
-                                        className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-4 py-3.5 transition-all outline-none text-slate-900 font-medium placeholder:text-slate-300"
-                                        placeholder={`Type ${field.label}...`}
-                                    />
-                                </div>
-                            ))}
+                        <div className="bg-indigo-600/5 rounded-2xl p-5 border border-indigo-100/50">
+                            <h3 className="text-sm font-bold text-indigo-900 mb-1">Preview Updates Instantly</h3>
+                            <p className="text-xs text-indigo-700/80">Every character you type is immediately rendered on the canvas.</p>
                         </div>
                     </div>
 
-                    <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100">
-                        <h3 className="font-bold text-indigo-900 mb-2">Pro Tip</h3>
-                        <p className="text-sm text-indigo-700">Get the best results by using Title Case for names (e.g., "John Doe").</p>
+                    {/* Right Panel: Canvas */}
+                    <div className="lg:col-span-8 xl:col-span-9 order-1 lg:order-2">
+                        <div className="bg-white/50 backdrop-blur rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 p-2 md:p-3 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                            <div className="relative bg-slate-100/50 rounded-2xl overflow-hidden border border-slate-200/50 flex flex-col items-center justify-center min-h-[400px]">
+                                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+                                <canvas
+                                    ref={canvasRef}
+                                    className="max-w-full h-auto shadow-2xl shadow-indigo-500/10 rounded-lg scale-[0.98] group-hover:scale-100 transition-transform duration-500 ease-out"
+                                />
+                            </div>
+                        </div>
+                        <p className="text-center text-xs text-slate-400 mt-4 font-medium uppercase tracking-widest">High Quality Preview Mode</p>
                     </div>
-                </div>
 
-                {/* Right: Preview Canvas (Order 1 on mobile, Order 2 on Desktop) */}
-                <div className="lg:col-span-8 xl:col-span-9 flex items-center justify-center bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden p-4 md:p-8 relative min-h-[300px] order-1 lg:order-2">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none"></div>
-                    <div className="relative shadow-2xl rounded-lg overflow-hidden ring-4 ring-white/10 max-w-full flex">
-                        <canvas
-                            ref={canvasRef}
-                            className="max-w-full h-auto object-contain"
-                        />
-                    </div>
                 </div>
-
             </main>
         </div>
     );
