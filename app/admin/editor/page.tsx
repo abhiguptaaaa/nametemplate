@@ -63,7 +63,7 @@ function TemplateEditorContent() {
             .catch(console.error);
     }, []);
 
-    // Load template (existing...)
+    // Load template
     useEffect(() => {
         if (id) {
             fetch('/api/templates')
@@ -140,7 +140,6 @@ function TemplateEditorContent() {
             const data = await res.json();
             if (data.success && data.font) {
                 setCustomFonts([...customFonts, data.font]);
-                // Re-inject will happen on next render if we depended on state, but easier to just append to style
                 const styleEl = document.getElementById('dynamic-fonts');
                 if (styleEl) {
                     styleEl.textContent += `
@@ -168,6 +167,7 @@ function TemplateEditorContent() {
             y: 50,
             width: 300,
             fontSize: 40,
+            fontWeight: 400,
             fontFamily: 'Arial',
             color: '#000000',
             alignment: 'left',
@@ -323,7 +323,8 @@ function TemplateEditorContent() {
             const isSelected = field.id === selectedFieldId;
 
             ctx.fillStyle = field.color;
-            ctx.font = `${field.fontSize}px ${field.fontFamily}`;
+            const weight = field.fontWeight || 400;
+            ctx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
             ctx.textAlign = field.alignment;
             ctx.textBaseline = 'top';
 
@@ -467,7 +468,7 @@ function TemplateEditorContent() {
 
                 {/* Right Column: Controls */}
                 <div className="lg:col-span-4 space-y-6">
-                    <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-white/50 shadow-xl shadow-indigo-100/50 sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+                    <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-white/50 shadow-xl shadow-indigo-100/50 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto custom-scrollbar">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="font-bold text-lg text-slate-800 flex items-center gap-2">
                                 <span className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center text-sm">Tt</span>
@@ -487,8 +488,8 @@ function TemplateEditorContent() {
                                     key={field.id}
                                     onClick={() => setSelectedFieldId(field.id)}
                                     className={`p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center ${selectedFieldId === field.id
-                                        ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500'
-                                        : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                                            ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500'
+                                            : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -565,16 +566,29 @@ function TemplateEditorContent() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Color</label>
-                                                <div className="flex gap-2 items-center">
-                                                    <input
-                                                        type="color"
-                                                        value={selectedField.color}
-                                                        onChange={(e) => updateField(selectedField.id, { color: e.target.value })}
-                                                        className="w-10 h-10 border border-slate-200 rounded-lg cursor-pointer"
-                                                    />
-                                                    <span className="text-xs font-mono text-slate-500">{selectedField.color}</span>
-                                                </div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Boldness ({selectedField.fontWeight || 400})</label>
+                                                <input
+                                                    type="range"
+                                                    min="100"
+                                                    max="900"
+                                                    step="100"
+                                                    value={selectedField.fontWeight || 400}
+                                                    onChange={(e) => updateField(selectedField.id, { fontWeight: parseInt(e.target.value) })}
+                                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 my-3"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Color</label>
+                                            <div className="flex gap-2 items-center">
+                                                <input
+                                                    type="color"
+                                                    value={selectedField.color}
+                                                    onChange={(e) => updateField(selectedField.id, { color: e.target.value })}
+                                                    className="w-10 h-10 border border-slate-200 rounded-lg cursor-pointer"
+                                                />
+                                                <span className="text-xs font-mono text-slate-500">{selectedField.color}</span>
                                             </div>
                                         </div>
 
@@ -586,8 +600,8 @@ function TemplateEditorContent() {
                                                         key={align}
                                                         onClick={() => updateField(selectedField.id, { alignment: align as any })}
                                                         className={`flex-1 py-1.5 rounded-md text-xs font-bold capitalize transition-all ${selectedField.alignment === align
-                                                            ? 'bg-indigo-100 text-indigo-700 shadow-sm'
-                                                            : 'text-slate-400 hover:text-slate-600'
+                                                                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
+                                                                : 'text-slate-400 hover:text-slate-600'
                                                             }`}
                                                     >
                                                         {align}

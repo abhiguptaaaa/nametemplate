@@ -38,7 +38,7 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative py-20 px-6 overflow-hidden">
+        <section className="relative py-12 md:py-20 px-4 md:px-6 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50 -z-10" />
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <div className="inline-flex items-center space-x-2 bg-white border border-slate-200 rounded-full px-4 py-1.5 shadow-sm mb-4">

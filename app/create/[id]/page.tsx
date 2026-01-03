@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { Template, TemplateField } from '@/lib/storage';
+import { Template, TemplateField, CustomFont } from '@/lib/storage';
 
 export default function CreateTemplate({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -11,11 +11,37 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const [template, setTemplate] = useState<Template | null>(null);
     const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
+    const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
 
+    // Fetch fonts and template
     useEffect(() => {
+        // Fetch Fonts
+        fetch('/api/fonts')
+            .then(res => res.json())
+            .then((fonts: CustomFont[]) => {
+                setCustomFonts(fonts);
+                // Inject styles
+                const styleId = 'dynamic-fonts';
+                let styleEl = document.getElementById(styleId);
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = styleId;
+                    document.head.appendChild(styleEl);
+                }
+                const css = fonts.map(font => `
+                    @font-face {
+                        font-family: '${font.name}';
+                        src: url('${font.dataUrl}');
+                    }
+                `).join('\n');
+                styleEl.textContent = css;
+            })
+            .catch(console.error);
+
+        // Fetch Template
         fetch('/api/templates')
             .then(res => res.json())
             .then((data: Template[]) => {
@@ -39,25 +65,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             });
     }, [id]);
 
-    const wrapText = (ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) => {
-        const words = text.split(' ');
-        let line = '';
-
-        for (let n = 0; n < words.length; n++) {
-            const testLine = line + words[n] + ' ';
-            const metrics = ctx.measureText(testLine);
-            const testWidth = metrics.width;
-            if (testWidth > maxWidth && n > 0) {
-                ctx.fillText(line, x, y);
-                line = words[n] + ' ';
-                y += lineHeight;
-            } else {
-                line = testLine;
-            }
-        }
-        ctx.fillText(line, x, y);
-    };
-
     const draw = () => {
         const canvas = canvasRef.current;
         if (!canvas || !imgRef.current || !template) return;
@@ -75,15 +82,17 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             if (!text) return;
 
             ctx.fillStyle = field.color;
-            ctx.font = `${field.fontSize}px ${field.fontFamily}`;
+            const weight = field.fontWeight || 400;
+            ctx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
             ctx.textAlign = field.alignment;
+            ctx.textBaseline = 'top';
 
             let drawX = field.x;
             if (field.alignment === 'center') drawX = field.x + field.width / 2;
             if (field.alignment === 'right') drawX = field.x + field.width;
 
-            const lineHeight = field.fontSize * 1.2;
-            wrapText(ctx, text, drawX, field.y + field.fontSize, field.width, lineHeight);
+            // Match Editor Logic (no wrap, just print)
+            ctx.fillText(text, drawX, field.y, field.width);
         });
     };
 
@@ -115,7 +124,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     return (
         <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 px-6 py-4">
+            <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 sticky top-0 z-50 shadow-sm">
                 <div className="max-w-[1600px] mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <button
@@ -125,28 +134,29 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </button>
                         <div>
-                            <h1 className="text-lg font-bold text-slate-900">{template.name}</h1>
-                            <p className="text-xs text-slate-500">Edit and Download</p>
+                            <h1 className="text-lg font-bold text-slate-900 truncate max-w-[150px] sm:max-w-xs">{template.name}</h1>
+                            <p className="text-xs text-slate-500 hidden sm:block">Edit and Download</p>
                         </div>
                     </div>
                     <button
                         onClick={handleDownload}
-                        className="bg-indigo-600 text-white font-bold px-6 py-2.5 rounded-full hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 flex items-center gap-2"
+                        className="bg-indigo-600 text-white font-bold px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 flex items-center gap-2 text-sm md:text-base"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        Download Image
+                        <span className="hidden sm:inline">Download Image</span>
+                        <span className="sm:hidden">Save</span>
                     </button>
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="flex-1 max-w-[1600px] mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-80px)]">
+            {/* Main Content - Mobile Friendly Grid order */}
+            <main className="flex-1 max-w-[1600px] mx-auto w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                {/* Left: Input Panel */}
-                <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex-1">
+                {/* Left: Input Panel (Order 2 on mobile, Order 1 on Desktop) */}
+                <div className="lg:col-span-4 xl:col-span-3 flex flex-col gap-6 order-2 lg:order-1 w-full lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto custom-scrollbar">
+                    <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100">
                         <h2 className="text-2xl font-bold mb-1 text-slate-900">Customize</h2>
-                        <p className="text-slate-500 text-sm mb-8">Fill in the details below to personalize your design.</p>
+                        <p className="text-slate-500 text-sm mb-8">Fill in the details below.</p>
 
                         <div className="space-y-6">
                             {template.fields.map(field => (
@@ -172,13 +182,13 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     </div>
                 </div>
 
-                {/* Right: Preview Canvas */}
-                <div className="lg:col-span-8 xl:col-span-9 flex items-center justify-center bg-[#e5e7eb] rounded-3xl border border-slate-300/50 shadow-inner overflow-hidden p-8 relative">
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
-                    <div className="relative shadow-2xl rounded-lg overflow-hidden ring-8 ring-white/50 max-w-full max-h-full flex">
+                {/* Right: Preview Canvas (Order 1 on mobile, Order 2 on Desktop) */}
+                <div className="lg:col-span-8 xl:col-span-9 flex items-center justify-center bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden p-4 md:p-8 relative min-h-[300px] order-1 lg:order-2">
+                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none"></div>
+                    <div className="relative shadow-2xl rounded-lg overflow-hidden ring-4 ring-white/10 max-w-full flex">
                         <canvas
                             ref={canvasRef}
-                            className="max-w-full max-h-full object-contain"
+                            className="max-w-full h-auto object-contain"
                         />
                     </div>
                 </div>

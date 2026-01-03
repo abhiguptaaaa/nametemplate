@@ -5,6 +5,7 @@ export interface TemplateField {
   y: number;
   width: number;
   fontSize: number;
+  fontWeight: number; // 100-900
   fontFamily: string;
   color: string;
   alignment: 'left' | 'center' | 'right';
