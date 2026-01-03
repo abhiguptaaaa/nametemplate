@@ -43,6 +43,12 @@ const Icons = {
     ),
     Plus: () => (
         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+    ),
+    ZoomIn: () => (
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+    ),
+    ZoomOut: () => (
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
     )
 };
 
@@ -52,6 +58,23 @@ const BackgroundEffects = () => (
         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-200/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob animation-delay-2000" />
     </div>
 );
+
+function Toast({ message, type, onClose }: { message: string, type: 'success' | 'error', onClose: () => void }) {
+    return (
+        <div className={`fixed bottom-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${type === 'success' ? 'bg-indigo-900 text-white' : 'bg-red-500 text-white'
+            }`}>
+            {type === 'success' ? (
+                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            ) : (
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            )}
+            <span className="font-medium">{message}</span>
+            <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    );
+}
 
 function TemplateEditorContent() {
     const router = useRouter();
@@ -65,6 +88,12 @@ function TemplateEditorContent() {
     const [isUploading, setIsUploading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+    // Zoom State
+    const [zoom, setZoom] = useState(1);
+
+    // Toast State
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
     // Font State
     const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
     const [isFontUploading, setIsFontUploading] = useState(false);
@@ -73,9 +102,15 @@ function TemplateEditorContent() {
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+    const [resizeStart, setResizeStart] = useState({ width: 0, fontSize: 0, mouseX: 0 });
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
+
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     // Check authentication
     useEffect(() => {
@@ -162,10 +197,11 @@ function TemplateEditorContent() {
                     imgRef.current = img;
                     draw();
                 };
+                showToast('Image uploaded successfully', 'success');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Upload error:', err);
-            alert(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            showToast(err.message || 'Upload failed', 'error');
         } finally {
             setIsUploading(false);
         }
@@ -197,11 +233,10 @@ function TemplateEditorContent() {
                         }
                     `;
                 }
-                alert('Font uploaded!');
+                showToast('Font uploaded successfully', 'success');
             }
         } catch (err) {
-            console.error('Font upload failed:', err);
-            alert('Font upload failed');
+            showToast('Font upload failed', 'error');
         } finally {
             setIsFontUploading(false);
         }
@@ -237,6 +272,9 @@ function TemplateEditorContent() {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
         const rect = canvas.getBoundingClientRect();
+        // Adjust for Zoom
+        // The rect is already scaled by CSS zoom. 
+        // We want coordinates relative to unscaled canvas.
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         return {
@@ -254,6 +292,11 @@ function TemplateEditorContent() {
                 const handleX = field.x + field.width;
                 if (x >= handleX - 20 && x <= handleX + 20 && y >= field.y - 10 && y <= field.y + field.fontSize + 10) {
                     setIsResizing(true);
+                    setResizeStart({
+                        width: field.width,
+                        fontSize: field.fontSize,
+                        mouseX: x
+                    });
                     return;
                 }
             }
@@ -281,8 +324,20 @@ function TemplateEditorContent() {
         if (isResizing && selectedFieldId) {
             const field = fields.find(f => f.id === selectedFieldId);
             if (field) {
-                const newWidth = Math.max(50, x - field.x);
-                updateField(selectedFieldId, { width: newWidth });
+                const deltaX = x - resizeStart.mouseX;
+
+                // Scale width
+                const newWidth = Math.max(50, resizeStart.width + deltaX);
+
+                // Scale font size proportionally
+                // Ratio: NewWidth / OldWidth
+                const scale = newWidth / resizeStart.width;
+                const newFontSize = Math.max(10, Math.round(resizeStart.fontSize * scale));
+
+                updateField(selectedFieldId, {
+                    width: newWidth,
+                    fontSize: newFontSize
+                });
             }
         }
     };
@@ -292,19 +347,7 @@ function TemplateEditorContent() {
         setIsResizing(false);
     };
 
-    // Touch Handling (Simplified for brevity, same logic as mouse)
-    const getTouchCoordinates = (e: React.TouchEvent) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return { x: 0, y: 0 };
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const touch = e.touches[0];
-        return {
-            x: (touch.clientX - rect.left) * scaleX,
-            y: (touch.clientY - rect.top) * scaleY
-        };
-    };
+    // Touch Handling
     const handleTouchStart = (e: React.TouchEvent) => { e.preventDefault(); handleMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any); };
     const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any); };
     const handleTouchEnd = () => handleMouseUp();
@@ -338,7 +381,7 @@ function TemplateEditorContent() {
 
             if (isSelected) {
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#6366f1'; // Indigo-500
+                ctx.strokeStyle = '#6366f1';
                 ctx.setLineDash([5, 5]);
                 ctx.strokeRect(field.x - 5, field.y - 5, field.width + 10, field.fontSize + 10);
                 ctx.setLineDash([]);
@@ -356,7 +399,7 @@ function TemplateEditorContent() {
 
     const saveTemplate = async () => {
         if (!name || !image) {
-            alert('Please provide a name and upload an image');
+            showToast('Please provide a name and upload an image', 'error');
             return;
         }
 
@@ -373,10 +416,14 @@ function TemplateEditorContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(template),
             });
-            if (res.ok) router.push('/admin');
-            else alert('Save failed');
+            if (res.ok) {
+                showToast('Template saved successfully!', 'success');
+                setTimeout(() => router.push('/admin'), 1000);
+            } else {
+                showToast('Save failed', 'error');
+            }
         } catch (err) {
-            alert('Save failed');
+            showToast('Save failed', 'error');
         }
     };
 
@@ -386,6 +433,7 @@ function TemplateEditorContent() {
     return (
         <div className="min-h-screen bg-[#FAFAFA] font-sans selection:bg-indigo-500/10 selection:text-indigo-700">
             <BackgroundEffects />
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Top Bar */}
             <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 h-16 flex items-center justify-between shadow-sm">
@@ -398,7 +446,6 @@ function TemplateEditorContent() {
                         <h1 className="text-lg font-bold text-slate-900 leading-tight">
                             {id ? 'Edit Template' : 'New Design'}
                         </h1>
-                        <p className="text-xs text-slate-500">Professional Certificate Studio</p>
                     </div>
                 </div>
 
@@ -425,7 +472,6 @@ function TemplateEditorContent() {
 
                 {/* Left: Canvas Area */}
                 <div className="lg:col-span-8 flex flex-col h-full gap-4">
-                    {/* Mobile Name Input (visible only on mobile) */}
                     <div className="md:hidden">
                         <input
                             type="text"
@@ -437,8 +483,15 @@ function TemplateEditorContent() {
                     </div>
 
                     <div className="flex-1 bg-white/50 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm relative overflow-hidden flex items-center justify-center p-8 group">
-                        {/* Grid Pattern Background */}
                         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
+                        {/* Image Loading Spinner */}
+                        {isUploading && (
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 mb-4"></div>
+                                <p className="text-indigo-600 font-bold animate-pulse">Uploading Image...</p>
+                            </div>
+                        )}
 
                         {!image ? (
                             <div className="text-center">
@@ -448,12 +501,14 @@ function TemplateEditorContent() {
                                     </div>
                                     <h3 className="text-xl font-bold text-slate-800">Upload Base Design</h3>
                                     <p className="text-slate-500 mt-2 text-sm">Drag & drop your certificate image or click to browse</p>
-                                    <p className="text-xs text-slate-400 mt-6 uppercase tracking-wider font-semibold">Supports PNG, JPG (High Res)</p>
                                     <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
                                 </label>
                             </div>
                         ) : (
-                            <div className="relative shadow-2xl shadow-slate-900/10 rounded-lg overflow-hidden ring-1 ring-slate-900/5 max-h-full max-w-full">
+                            <div
+                                className="relative shadow-2xl shadow-slate-900/10 rounded-lg overflow-hidden ring-1 ring-slate-900/5 max-h-full max-w-full transition-transform duration-200 ease-out"
+                                style={{ transform: `scale(${zoom})` }}
+                            >
                                 <canvas
                                     ref={canvasRef}
                                     onMouseDown={handleMouseDown}
@@ -478,19 +533,36 @@ function TemplateEditorContent() {
                         )}
                     </div>
 
-                    {/* Bottom Toolbar (Canvas Actions) */}
+                    {/* Bottom Toolbar */}
                     {image && (
                         <div className="flex justify-between items-center bg-white rounded-2xl p-3 px-6 shadow-sm border border-slate-200">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Canvas Actions</span>
-                            <div className="flex gap-4">
-                                <button className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Zoom In</button>
-                                <button className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Zoom Out</button>
-                                <button className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors" onClick={() => {
-                                    if (imgRef.current) {
-                                        canvasRef.current!.width = imgRef.current.width;
-                                        draw();
-                                    }
-                                }}>Reset View</button>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Canvas View</span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
+                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                                >
+                                    <Icons.ZoomOut /> Zoom Out
+                                </button>
+                                <span className="text-sm font-bold text-slate-400 py-1.5 px-2">{Math.round(zoom * 100)}%</span>
+                                <button
+                                    onClick={() => setZoom(z => Math.min(2, z + 0.1))}
+                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                                >
+                                    <Icons.ZoomIn /> Zoom In
+                                </button>
+                                <button
+                                    className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors ml-4"
+                                    onClick={() => {
+                                        if (imgRef.current) {
+                                            canvasRef.current!.width = imgRef.current.width;
+                                            setZoom(1);
+                                            draw();
+                                        }
+                                    }}
+                                >
+                                    Reset
+                                </button>
                             </div>
                         </div>
                     )}
@@ -499,8 +571,6 @@ function TemplateEditorContent() {
                 {/* Right: Properties Panel */}
                 <div className="lg:col-span-4 h-full overflow-y-auto pr-1 pb-10 custom-scrollbar">
                     <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 flex flex-col overflow-hidden min-h-full">
-
-                        {/* Panel Header */}
                         <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <h2 className="font-bold text-slate-800">Layers & Properties</h2>
                             <button
@@ -511,7 +581,6 @@ function TemplateEditorContent() {
                             </button>
                         </div>
 
-                        {/* Layers List */}
                         <div className="p-5 border-b border-slate-100 bg-white">
                             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Layers</h3>
                             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
@@ -545,7 +614,6 @@ function TemplateEditorContent() {
                             </div>
                         </div>
 
-                        {/* Properties Form */}
                         {selectedField ? (
                             <div className="p-6 space-y-6 bg-white animate-in slide-in-from-right-4 duration-300">
                                 <div>
@@ -581,17 +649,30 @@ function TemplateEditorContent() {
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Size (px)</label>
-                                        <input
-                                            type="number"
-                                            value={selectedField.fontSize}
-                                            onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                                        />
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
+                                            <span>Size</span>
+                                            <span className="text-indigo-600">{selectedField.fontSize}px</span>
+                                        </label>
+                                        <div className="flex gap-2 items-center">
+                                            <input
+                                                type="range"
+                                                min="10"
+                                                max="200"
+                                                value={selectedField.fontSize}
+                                                onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
+                                                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                            />
+                                            <input
+                                                type="number"
+                                                value={selectedField.fontSize}
+                                                onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
+                                                className="w-16 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-sm text-center outline-none"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div>
+                                    <div className="col-span-2">
                                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Color</label>
                                         <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2">
                                             <input
@@ -611,7 +692,7 @@ function TemplateEditorContent() {
                                         type="range"
                                         min="100"
                                         max="900"
-                                        step="100"
+                                        step="10"
                                         value={selectedField.fontWeight || 400}
                                         onChange={(e) => updateField(selectedField.id, { fontWeight: parseInt(e.target.value) })}
                                         className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
