@@ -61,8 +61,8 @@ const BackgroundEffects = () => (
 
 function Toast({ message, type, onClose }: { message: string, type: 'success' | 'error', onClose: () => void }) {
     return (
-        <div className={`fixed bottom-4 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${type === 'success' ? 'bg-indigo-900 text-white' : 'bg-red-500 text-white'
-            }`}>
+        <div className={`fixed bottom - 4 right - 4 z - 50 px - 6 py - 4 rounded - xl shadow - 2xl flex items - center gap - 3 animate -in slide -in -from - bottom - 5 fade -in duration - 300 ${type === 'success' ? 'bg-indigo-900 text-white' : 'bg-red-500 text-white'
+            } `}>
             {type === 'success' ? (
                 <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             ) : (
@@ -136,11 +136,11 @@ function TemplateEditorContent() {
                     document.head.appendChild(styleEl);
                 }
                 const css = fonts.map(font => `
-                    @font-face {
-                        font-family: '${font.name}';
-                        src: url('${font.dataUrl}');
-                    }
-                `).join('\n');
+@font-face {
+    font - family: '${font.name}';
+    src: url('${font.dataUrl}');
+}
+`).join('\n');
                 styleEl.textContent = css;
             })
             .catch(console.error);
@@ -149,7 +149,21 @@ function TemplateEditorContent() {
     // Load template or draft
     useEffect(() => {
         const loadData = async () => {
-            const draftKey = `draft_${id || 'new'}`;
+            const draftKey = `draft_${id || 'new'} `;
+
+            // Check for explicit "new" session
+            if (searchParams.get('new') === 'true') {
+                localStorage.removeItem(draftKey);
+                // Remove param from URL without refresh
+                const url = new URL(window.location.href);
+                url.searchParams.delete('new');
+                window.history.replaceState({}, '', url);
+
+                // If creating new, we are done (empty state). 
+                // If editing existing (unlikely with this flag), we proceed to DB fetch.
+                if (!id) return;
+            }
+
             const savedDraft = localStorage.getItem(draftKey);
 
             if (savedDraft) {
@@ -201,7 +215,7 @@ function TemplateEditorContent() {
     useEffect(() => {
         if (!name && !image && fields.length === 0) return;
 
-        const draftKey = `draft_${id || 'new'}`;
+        const draftKey = `draft_${id || 'new'} `;
         const draftData = { name, image, fields };
         localStorage.setItem(draftKey, JSON.stringify(draftData));
     }, [name, image, fields, id]);
@@ -263,11 +277,11 @@ function TemplateEditorContent() {
                 const styleEl = document.getElementById('dynamic-fonts');
                 if (styleEl) {
                     styleEl.textContent += `
-                        @font-face {
-                            font-family: '${data.font.name}';
-                            src: url('${data.font.dataUrl}');
-                        }
-                    `;
+@font-face {
+    font - family: '${data.font.name}';
+    src: url('${data.font.dataUrl}');
+}
+`;
                 }
                 showToast('Font uploaded successfully', 'success');
             }
@@ -453,7 +467,7 @@ function TemplateEditorContent() {
                 body: JSON.stringify(template),
             });
             if (res.ok) {
-                localStorage.removeItem(`draft_${id || 'new'}`); // Clear draft on save
+                localStorage.removeItem(`draft_${id || 'new'} `); // Clear draft on save
                 showToast('Template saved successfully!', 'success');
                 setTimeout(() => router.push('/admin'), 1000);
             } else {
@@ -555,7 +569,7 @@ function TemplateEditorContent() {
                                     onTouchStart={handleTouchStart}
                                     onTouchMove={handleTouchMove}
                                     onTouchEnd={handleTouchEnd}
-                                    className={`block max-w-full max-h-[80vh] w-auto h-auto object-contain ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'}`}
+                                    className={`block max - w - full max - h - [80vh] w - auto h - auto object - contain ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'} `}
                                 />
                                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
@@ -630,18 +644,18 @@ function TemplateEditorContent() {
                                         <div
                                             key={field.id}
                                             onClick={() => setSelectedFieldId(field.id)}
-                                            className={`p-3 rounded-xl border cursor-pointer flex justify-between items-center transition-all group ${selectedFieldId === field.id
-                                                ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500/20'
-                                                : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
-                                                }`}
+                                            className={`p - 3 rounded - xl border cursor - pointer flex justify - between items - center transition - all group ${selectedFieldId === field.id
+                                                    ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500/20'
+                                                    : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
+                                                } `}
                                         >
                                             <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${selectedFieldId === field.id ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-500'}`}>T</div>
-                                                <span className={`text-sm font-medium truncate ${selectedFieldId === field.id ? 'text-indigo-900' : 'text-slate-600'}`}>{field.label}</span>
+                                                <div className={`w - 8 h - 8 rounded - lg flex items - center justify - center text - xs font - bold ${selectedFieldId === field.id ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-500'} `}>T</div>
+                                                <span className={`text - sm font - medium truncate ${selectedFieldId === field.id ? 'text-indigo-900' : 'text-slate-600'} `}>{field.label}</span>
                                             </div>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); deleteField(field.id); }}
-                                                className={`p-1.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors ${selectedFieldId === field.id ? 'text-indigo-300' : 'text-slate-300 opacity-0 group-hover:opacity-100'}`}
+                                                className={`p - 1.5 rounded - md hover: bg - red - 50 hover: text - red - 500 transition - colors ${selectedFieldId === field.id ? 'text-indigo-300' : 'text-slate-300 opacity-0 group-hover:opacity-100'} `}
                                             >
                                                 <Icons.Trash />
                                             </button>
@@ -749,10 +763,10 @@ function TemplateEditorContent() {
                                             <button
                                                 key={align}
                                                 onClick={() => updateField(selectedField.id, { alignment: align as any })}
-                                                className={`flex-1 py-2 rounded-lg flex justify-center transition-all ${selectedField.alignment === align
-                                                    ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
-                                                    : 'text-slate-400 hover:text-slate-600'
-                                                    }`}
+                                                className={`flex - 1 py - 2 rounded - lg flex justify - center transition - all ${selectedField.alignment === align
+                                                        ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
+                                                        : 'text-slate-400 hover:text-slate-600'
+                                                    } `}
                                             >
                                                 {align === 'left' && <Icons.AlignLeft />}
                                                 {align === 'center' && <Icons.AlignCenter />}

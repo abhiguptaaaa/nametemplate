@@ -232,7 +232,7 @@ export default function AdminDashboard() {
                         <p className="text-slate-500 text-lg">Manage your design library and configurations.</p>
                     </div>
                     <Link
-                        href="/admin/editor"
+                        href="/admin/editor?new=true"
                         className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-full font-semibold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all active:scale-95"
                     >
                         <Icons.Plus /> Create New Template
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
                         <h3 className="text-2xl font-bold text-slate-900 mb-2">No templates yet</h3>
                         <p className="text-slate-500 mb-8 max-w-sm mx-auto">Your library is empty. Create your first certificate or card template to get started.</p>
                         <Link
-                            href="/admin/editor"
+                            href="/admin/editor?new=true"
                             className="inline-flex items-center px-6 py-3 bg-white border border-slate-300 shadow-sm text-slate-700 font-medium rounded-full hover:bg-slate-50 hover:border-slate-400 transition-all"
                         >
                             Create Template
