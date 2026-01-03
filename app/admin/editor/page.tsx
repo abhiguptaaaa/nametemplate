@@ -146,29 +146,65 @@ function TemplateEditorContent() {
             .catch(console.error);
     }, []);
 
-    // Load template
+    // Load template or draft
     useEffect(() => {
-        if (id) {
-            fetch('/api/templates')
-                .then(res => res.json())
-                .then((data: Template[]) => {
-                    const template = data.find(t => t.id === id);
-                    if (template) {
-                        setName(template.name);
-                        setImage(template.imageUrl);
-                        setFields(template.fields);
+        const loadData = async () => {
+            const draftKey = `draft_${id || 'new'}`;
+            const savedDraft = localStorage.getItem(draftKey);
 
+            if (savedDraft) {
+                try {
+                    const parsed = JSON.parse(savedDraft);
+                    setName(parsed.name || '');
+                    setImage(parsed.image);
+                    setFields(parsed.fields || []);
+                    if (parsed.image) {
                         const img = new Image();
-                        img.src = template.imageUrl;
+                        img.src = parsed.image;
                         img.onload = () => {
                             imgRef.current = img;
                             draw();
                         };
                     }
-                })
-                .catch(console.error);
-        }
+                    showToast('Restored unsaved draft', 'success');
+                    return; // Skip DB fetch if draft exists
+                } catch (e) {
+                    console.error('Failed to parse draft', e);
+                }
+            }
+
+            if (id) {
+                fetch('/api/templates')
+                    .then(res => res.json())
+                    .then((data: Template[]) => {
+                        const template = data.find(t => t.id === id);
+                        if (template) {
+                            setName(template.name);
+                            setImage(template.imageUrl);
+                            setFields(template.fields);
+
+                            const img = new Image();
+                            img.src = template.imageUrl;
+                            img.onload = () => {
+                                imgRef.current = img;
+                                draw();
+                            };
+                        }
+                    })
+                    .catch(console.error);
+            }
+        };
+        loadData();
     }, [id]);
+
+    // Auto-save draft
+    useEffect(() => {
+        if (!name && !image && fields.length === 0) return;
+
+        const draftKey = `draft_${id || 'new'}`;
+        const draftData = { name, image, fields };
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
+    }, [name, image, fields, id]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -417,6 +453,7 @@ function TemplateEditorContent() {
                 body: JSON.stringify(template),
             });
             if (res.ok) {
+                localStorage.removeItem(`draft_${id || 'new'}`); // Clear draft on save
                 showToast('Template saved successfully!', 'success');
                 setTimeout(() => router.push('/admin'), 1000);
             } else {

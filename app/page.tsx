@@ -245,8 +245,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Nora Dashboard. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium">Privacy</a>
-            <a href="#" className="text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium">Terms</a>
+            <Link href="/privacy" className="text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium">Privacy</Link>
+            <Link href="/terms" className="text-slate-400 hover:text-indigo-600 transition-colors text-sm font-medium">Terms</Link>
           </div>
         </div>
       </footer>

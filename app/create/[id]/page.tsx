@@ -50,6 +50,19 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     setTemplate(t);
                     const initialValues: Record<string, string> = {};
                     t.fields.forEach(f => initialValues[f.id] = '');
+
+                    // Check for saved draft
+                    const savedDraft = localStorage.getItem(`user_draft_${t.id}`);
+                    if (savedDraft) {
+                        try {
+                            const parsed = JSON.parse(savedDraft);
+                            // Only restore valid field IDs
+                            t.fields.forEach(f => {
+                                if (parsed[f.id]) initialValues[f.id] = parsed[f.id];
+                            });
+                        } catch (e) { console.error(e); }
+                    }
+
                     setFieldValues(initialValues);
 
                     const img = new Image();
@@ -98,6 +111,10 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
 
     useEffect(() => {
         draw();
+        // Autosave draft
+        if (template && Object.keys(fieldValues).length > 0) {
+            localStorage.setItem(`user_draft_${template.id}`, JSON.stringify(fieldValues));
+        }
     }, [fieldValues, template]);
 
     const handleDownload = () => {
