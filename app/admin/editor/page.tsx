@@ -67,8 +67,8 @@ const BackgroundEffects = () => (
 
 function Toast({ message, type, onClose }: { message: string, type: 'success' | 'error', onClose: () => void }) {
     return (
-        <div className={`fixed bottom - 4 right - 4 z - 50 px - 6 py - 4 rounded - xl shadow - 2xl flex items - center gap - 3 animate -in slide -in -from - bottom - 5 fade -in duration - 300 ${type === 'success' ? 'bg-indigo-900 text-white' : 'bg-red-500 text-white'
-            } `}>
+        <div className={`fixed bottom-4 right-4 z-[9999] px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${type === 'success' ? 'bg-indigo-900 text-white' : 'bg-red-500 text-white'
+            }`}>
             {type === 'success' ? (
                 <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             ) : (
