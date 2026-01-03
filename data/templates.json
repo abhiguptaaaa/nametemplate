@@ -1,0 +1,31 @@
+[
+  {
+    "id": "seed-template-1",
+    "name": "Test Certificate",
+    "imageUrl": "/uploads/test-template.svg",
+    "fields": [
+      {
+        "id": "field-1",
+        "label": "Recipient Name",
+        "x": 200,
+        "y": 350,
+        "width": 400,
+        "fontSize": 48,
+        "fontFamily": "Arial",
+        "color": "#b3949a",
+        "alignment": "center"
+      },
+      {
+        "id": "yl26729qq",
+        "label": "New Field",
+        "x": 50,
+        "y": 50,
+        "width": 300,
+        "fontSize": 40,
+        "fontFamily": "Arial",
+        "color": "#000000",
+        "alignment": "left"
+      }
+    ]
+  }
+]
