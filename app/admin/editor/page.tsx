@@ -561,31 +561,34 @@ function TemplateEditorContent() {
                         />
                     </div>
 
-                    <div className="flex-1 bg-white/50 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm relative overflow-hidden flex items-center justify-center p-8 group min-h-[50vh] lg:min-h-0">
-                        <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                    <div className="flex-1 bg-slate-100/50 backdrop-blur-sm rounded-3xl border border-slate-200/60 shadow-inner relative overflow-hidden flex items-center justify-center p-4 lg:p-8 group min-h-[50vh] lg:min-h-0">
+                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
                         {/* Image Loading Spinner */}
                         {isUploading && (
-                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 mb-4"></div>
-                                <p className="text-indigo-600 font-bold animate-pulse">Uploading Image...</p>
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm transition-all duration-300">
+                                <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-100 border-t-indigo-600 mb-4 shadow-lg"></div>
+                                <p className="text-indigo-900 font-bold animate-pulse tracking-wide">Uploading Design...</p>
                             </div>
                         )}
 
                         {!image ? (
-                            <div className="text-center">
-                                <label className="relative cursor-pointer group flex flex-col items-center justify-center w-full max-w-lg mx-auto p-12 border-3 border-dashed border-slate-300 rounded-3xl hover:border-indigo-500 hover:bg-indigo-50/50 transition-all duration-300">
-                                    <div className="w-20 h-20 bg-white rounded-2xl shadow-md flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <div className="text-center w-full max-w-lg mx-auto animate-in fade-in zoom-in duration-500">
+                                <label className="relative cursor-pointer group flex flex-col items-center justify-center w-full aspect-video bg-white border-2 border-dashed border-slate-300 rounded-3xl hover:border-indigo-500 hover:bg-indigo-50/30 transition-all duration-300 shadow-sm hover:shadow-md">
+                                    <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300 shadow-sm">
                                         <Icons.Image />
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-800">Upload Base Design</h3>
-                                    <p className="text-slate-500 mt-2 text-sm">Drag & drop your certificate image or click to browse</p>
+                                    <h3 className="text-2xl font-bold text-slate-800 mb-2">Upload Base Design</h3>
+                                    <p className="text-slate-500 text-sm max-w-[260px] leading-relaxed">Click to browse or drag & drop your certificate/card template here.</p>
+                                    <div className="mt-6 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-full shadow-lg shadow-indigo-500/30 group-hover:bg-indigo-700 transition-colors">
+                                        Choose Image
+                                    </div>
                                     <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
                                 </label>
                             </div>
                         ) : (
                             <div
-                                className="relative shadow-2xl shadow-slate-900/10 rounded-lg overflow-hidden ring-1 ring-slate-900/5 max-h-full max-w-full transition-transform duration-200 ease-out"
+                                className="relative shadow-2xl shadow-slate-900/20 rounded-lg overflow-hidden ring-4 ring-white transition-transform duration-200 ease-out"
                                 style={{ transform: `scale(${zoom})` }}
                             >
                                 <canvas
@@ -597,12 +600,12 @@ function TemplateEditorContent() {
                                     onTouchStart={handleTouchStart}
                                     onTouchMove={handleTouchMove}
                                     onTouchEnd={handleTouchEnd}
-                                    className={`block max - w - full max - h - [80vh] w - auto h - auto object - contain ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'} `}
+                                    className={`block max-w-full max-h-[75vh] w-auto h-auto object-contain ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'}`}
                                 />
                                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => setImage(null)}
-                                        className="bg-white text-red-500 p-2 rounded-lg shadow-lg hover:bg-red-50 transition border border-slate-100"
+                                        className="bg-white/90 backdrop-blur text-red-500 p-2.5 rounded-full shadow-lg hover:bg-red-50 transition border border-red-100"
                                         title="Remove Image"
                                     >
                                         <Icons.Trash />
@@ -662,33 +665,38 @@ function TemplateEditorContent() {
                             </button>
                         </div>
 
-                        <div className="p-5 border-b border-slate-100 bg-white">
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Layers</h3>
-                            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                        <div className="p-5 border-b border-slate-100 bg-white flex-1 min-h-0 flex flex-col">
+                            <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Layers
+                            </h3>
+                            <div className="space-y-2 overflow-y-auto custom-scrollbar pr-1 flex-1 min-h-[150px]">
                                 {fields.length === 0 ? (
-                                    <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-xl">
-                                        <p className="text-sm text-slate-400">No text layers yet.</p>
+                                    <div className="text-center py-10 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
+                                        <p className="text-sm font-medium text-slate-400">No text layers yet.</p>
+                                        <button onClick={addField} className="text-indigo-600 text-xs font-bold mt-2 hover:underline">Add one now</button>
                                     </div>
                                 ) : (
-                                    fields.map(field => (
+                                    fields.map((field, idx) => (
                                         <div
                                             key={field.id}
                                             onClick={() => setSelectedFieldId(field.id)}
-                                            className={`p - 3 rounded - xl border cursor - pointer flex justify - between items - center transition - all group ${selectedFieldId === field.id
-                                                ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500/20'
-                                                : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
-                                                } `}
+                                            className={`p-3 rounded-2xl border cursor-pointer flex justify-between items-center transition-all duration-200 group relative pl-4 ${selectedFieldId === field.id
+                                                ? 'border-indigo-500 bg-indigo-50/50 shadow-md ring-1 ring-indigo-500/20 translate-x-1'
+                                                : 'border-slate-100 hover:border-indigo-300 hover:bg-white hover:shadow-sm'
+                                                }`}
                                         >
                                             <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className={`w - 8 h - 8 rounded - lg flex items - center justify - center text - xs font - bold ${selectedFieldId === field.id ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-500'} `}>T</div>
-                                                <span className={`text - sm font - medium truncate ${selectedFieldId === field.id ? 'text-indigo-900' : 'text-slate-600'} `}>{field.label}</span>
+                                                <span className="text-[10px] font-mono text-slate-300 w-3">{idx + 1}</span>
+                                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shadow-sm transition-colors ${selectedFieldId === field.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600'}`}>T</div>
+                                                <span className={`text-sm font-medium truncate max-w-[120px] ${selectedFieldId === field.id ? 'text-indigo-900' : 'text-slate-600'}`}>{field.label}</span>
                                             </div>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); deleteField(field.id); }}
-                                                className={`p - 1.5 rounded - md hover: bg - red - 50 hover: text - red - 500 transition - colors ${selectedFieldId === field.id ? 'text-indigo-300' : 'text-slate-300 opacity-0 group-hover:opacity-100'} `}
+                                                className={`p-2 rounded-lg hover:bg-red-50 hover:text-red-500 transition-all ${selectedFieldId === field.id ? 'text-indigo-300' : 'text-slate-300 opacity-0 group-hover:opacity-100'}`}
                                             >
                                                 <Icons.Trash />
                                             </button>
+                                            {selectedFieldId === field.id && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-500 rounded-r-full"></div>}
                                         </div>
                                     ))
                                 )}
@@ -788,15 +796,16 @@ function TemplateEditorContent() {
 
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Alignment</label>
-                                    <div className="flex bg-slate-100 rounded-xl p-1">
+                                    <div className="flex bg-slate-100/80 p-1.5 rounded-xl gap-1">
                                         {['left', 'center', 'right'].map((align) => (
                                             <button
                                                 key={align}
                                                 onClick={() => updateField(selectedField.id, { alignment: align as any })}
-                                                className={`flex - 1 py - 2 rounded - lg flex justify - center transition - all ${selectedField.alignment === align
-                                                    ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
-                                                    : 'text-slate-400 hover:text-slate-600'
-                                                    } `}
+                                                className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all duration-200 ${selectedField.alignment === align
+                                                    ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-indigo-500/10 scale-100 font-bold'
+                                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 scale-95'
+                                                    }`}
+                                                title={`Align ${align.charAt(0).toUpperCase() + align.slice(1)}`}
                                             >
                                                 {align === 'left' && <Icons.AlignLeft />}
                                                 {align === 'center' && <Icons.AlignCenter />}
