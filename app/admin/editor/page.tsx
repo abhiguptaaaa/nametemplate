@@ -49,6 +49,12 @@ const Icons = {
     ),
     ZoomOut: () => (
         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
+    ),
+    Lock: () => (
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+    ),
+    Unlock: () => (
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>
     )
 };
 
@@ -101,6 +107,7 @@ function TemplateEditorContent() {
     // Interaction states
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [resizeStart, setResizeStart] = useState({ width: 0, fontSize: 0, mouseX: 0 });
 
@@ -215,10 +222,22 @@ function TemplateEditorContent() {
     useEffect(() => {
         if (!name && !image && fields.length === 0) return;
 
-        const draftKey = `draft_${id || 'new'} `;
+        const draftKey = `draft_${id || 'new'}`;
         const draftData = { name, image, fields };
         localStorage.setItem(draftKey, JSON.stringify(draftData));
     }, [name, image, fields, id]);
+
+    // Robust Image Loading
+    useEffect(() => {
+        if (image) {
+            const img = new Image();
+            img.src = image;
+            img.onload = () => {
+                imgRef.current = img;
+                draw();
+            };
+        }
+    }, [image]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -334,6 +353,7 @@ function TemplateEditorContent() {
     };
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        if (isLocked) return;
         const { x, y } = getCanvasCoordinates(e);
 
         if (selectedFieldId) {
@@ -501,7 +521,15 @@ function TemplateEditorContent() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="hidden md:block">
+                    <div className="hidden md:flex items-center gap-2">
+                        <button
+                            onClick={() => setIsLocked(!isLocked)}
+                            className={`flex items-center px-4 py-2 rounded-full font-medium transition-all ${isLocked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
+                            title={isLocked ? "Unlock Canvas" : "Lock Canvas"}
+                        >
+                            {isLocked ? <Icons.Lock /> : <Icons.Unlock />}
+                            <span className="hidden lg:inline">{isLocked ? 'Locked' : 'Unlocked'}</span>
+                        </button>
                         <input
                             type="text"
                             value={name}
@@ -586,24 +614,26 @@ function TemplateEditorContent() {
 
                     {/* Bottom Toolbar */}
                     {image && (
-                        <div className="flex justify-between items-center bg-white rounded-2xl p-3 px-6 shadow-sm border border-slate-200">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Canvas View</span>
-                            <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-2xl p-3 px-6 shadow-sm border border-slate-200 gap-3">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:block">Canvas View</span>
+
+                            {/* Mobile Controls Row */}
+                            <div className="flex items-center justify-between w-full sm:w-auto gap-2 overflow-x-auto scrollbar-hide py-1">
                                 <button
                                     onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
-                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                                 >
-                                    <Icons.ZoomOut /> Zoom Out
+                                    <Icons.ZoomOut /> <span className="hidden sm:inline">Zoom Out</span>
                                 </button>
-                                <span className="text-sm font-bold text-slate-400 py-1.5 px-2">{Math.round(zoom * 100)}%</span>
+                                <span className="text-sm font-bold text-slate-400 py-1.5 px-2 min-w-[3rem] text-center">{Math.round(zoom * 100)}%</span>
                                 <button
                                     onClick={() => setZoom(z => Math.min(2, z + 0.1))}
-                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                                 >
-                                    <Icons.ZoomIn /> Zoom In
+                                    <Icons.ZoomIn /> <span className="hidden sm:inline">Zoom In</span>
                                 </button>
                                 <button
-                                    className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors ml-4"
+                                    className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors ml-2 md:ml-4 whitespace-nowrap"
                                     onClick={() => {
                                         if (imgRef.current) {
                                             canvasRef.current!.width = imgRef.current.width;
@@ -645,8 +675,8 @@ function TemplateEditorContent() {
                                             key={field.id}
                                             onClick={() => setSelectedFieldId(field.id)}
                                             className={`p - 3 rounded - xl border cursor - pointer flex justify - between items - center transition - all group ${selectedFieldId === field.id
-                                                    ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500/20'
-                                                    : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
+                                                ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500/20'
+                                                : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
                                                 } `}
                                         >
                                             <div className="flex items-center gap-3 overflow-hidden">
@@ -764,8 +794,8 @@ function TemplateEditorContent() {
                                                 key={align}
                                                 onClick={() => updateField(selectedField.id, { alignment: align as any })}
                                                 className={`flex - 1 py - 2 rounded - lg flex justify - center transition - all ${selectedField.alignment === align
-                                                        ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
-                                                        : 'text-slate-400 hover:text-slate-600'
+                                                    ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
+                                                    : 'text-slate-400 hover:text-slate-600'
                                                     } `}
                                             >
                                                 {align === 'left' && <Icons.AlignLeft />}
