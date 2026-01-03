@@ -111,6 +111,7 @@ function TemplateEditorContent() {
     const [isLocked, setIsLocked] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [resizeStart, setResizeStart] = useState({ width: 0, fontSize: 0, mouseX: 0 });
+    const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
@@ -419,9 +420,44 @@ function TemplateEditorContent() {
     };
 
     // Touch Handling
-    const handleTouchStart = (e: React.TouchEvent) => { e.preventDefault(); handleMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any); };
-    const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any); };
-    const handleTouchEnd = () => handleMouseUp();
+    // Touch Handling (Enhanced for Pinch Zoom)
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (e.touches.length === 2) {
+            // Pinch Start
+            e.preventDefault();
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            setLastTouchDistance(dist);
+        } else {
+            // Drag Start
+            handleMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any);
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (e.touches.length === 2 && lastTouchDistance !== null) {
+            // Pinch Move
+            e.preventDefault();
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const delta = dist - lastTouchDistance;
+            // Sensitivity: 0.005 zoom per pixel diff
+            const newZoom = Math.min(3, Math.max(0.2, zoom + delta * 0.005));
+            setZoom(newZoom);
+            setLastTouchDistance(dist); // Update for smooth continuous zoom
+        } else {
+            handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setLastTouchDistance(null);
+        handleMouseUp();
+    };
 
     const draw = () => {
         const canvas = canvasRef.current;
@@ -550,10 +586,10 @@ function TemplateEditorContent() {
                         {isSaving ? (
                             <>
                                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                Saving...
+                                Saving changes...
                             </>
                         ) : (
-                            <><Icons.Save /> Save</>
+                            <><Icons.Save /> Save Design</>
                         )}
                     </button>
                 </div>
@@ -586,14 +622,16 @@ function TemplateEditorContent() {
 
                         {!image ? (
                             <div className="text-center w-full max-w-lg mx-auto">
-                                <label className="relative cursor-pointer group flex flex-col items-center justify-center w-full aspect-video bg-white border-2 border-dashed border-slate-300 rounded-3xl hover:border-indigo-500 hover:bg-indigo-50/30 transition-all duration-300 shadow-sm hover:shadow-md">
-                                    <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300 shadow-sm">
+                                <label className="relative cursor-pointer group flex flex-col items-center justify-center w-full px-6 py-12 lg:py-16 aspect-video bg-white border-3 border-dashed border-slate-300 rounded-3xl hover:border-indigo-500 hover:bg-indigo-50/30 transition-all duration-300 shadow-sm hover:shadow-md gap-4">
+                                    <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300 shadow-sm">
                                         <Icons.Image />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-slate-800 mb-2">Upload Base Design</h3>
-                                    <p className="text-slate-500 text-sm max-w-[260px] leading-relaxed">Click to browse or drag & drop your certificate/card template here.</p>
-                                    <div className="mt-6 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-full shadow-lg shadow-indigo-500/30 group-hover:bg-indigo-700 transition-colors">
-                                        Choose Image
+                                    <div className="space-y-1">
+                                        <h3 className="text-xl lg:text-2xl font-bold text-slate-800">Upload Base Design</h3>
+                                        <p className="text-slate-500 text-sm max-w-[260px] mx-auto leading-relaxed">Drag & drop your certificate or card image here</p>
+                                    </div>
+                                    <div className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/30 group-hover:bg-indigo-700 transition-colors mt-2">
+                                        Select Image File
                                     </div>
                                     <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
                                 </label>
@@ -614,15 +652,20 @@ function TemplateEditorContent() {
                                     onTouchEnd={handleTouchEnd}
                                     className={`block max-w-full max-h-[75vh] w-auto h-auto object-contain ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'}`}
                                 />
-                                <div className="absolute top-4 right-4 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={() => setImage(null)}
-                                        className="bg-white/90 backdrop-blur text-red-500 p-2.5 rounded-full shadow-lg hover:bg-red-50 transition border border-red-100"
-                                        title="Remove Image"
-                                    >
-                                        <Icons.Trash />
-                                    </button>
-                                </div>
+                                {/* Image Removed - Buttons Moved Outside */}
+                            </div>
+                        )}
+
+                        {/* Fixed Controls Overlay (Outside Zoom) */}
+                        {image && (
+                            <div className="absolute top-4 right-4 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
+                                <button
+                                    onClick={() => setImage(null)}
+                                    className="bg-white/90 backdrop-blur text-red-500 p-3 rounded-xl shadow-lg hover:bg-red-50 transition border border-red-100 font-medium flex items-center gap-2"
+                                    title="Remove Image"
+                                >
+                                    <Icons.Trash /> <span className="text-xs font-bold hidden sm:inline">Delete Image</span>
+                                </button>
                             </div>
                         )}
                     </div>
@@ -851,7 +894,7 @@ function TemplateEditorContent() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
