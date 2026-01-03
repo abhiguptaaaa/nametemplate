@@ -2,7 +2,56 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Template, TemplateField, CustomFont } from '@/lib/storage';
+
+// --- Icons ---
+const Icons = {
+    Back: () => (
+        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+    ),
+    Save: () => (
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        </svg>
+    ),
+    Image: () => (
+        <svg className="w-8 h-8 text-indigo-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+    ),
+    Text: () => (
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+        </svg>
+    ),
+    Trash: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+    ),
+    AlignLeft: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h7" /></svg>
+    ),
+    AlignCenter: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 12h10M7 18h10" /></svg>
+    ),
+    AlignRight: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 12h10M7 18h13" /></svg>
+    ),
+    Plus: () => (
+        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+    )
+};
+
+const BackgroundEffects = () => (
+    <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob" />
+        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-200/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob animation-delay-2000" />
+    </div>
+);
 
 function TemplateEditorContent() {
     const router = useRouter();
@@ -44,7 +93,6 @@ function TemplateEditorContent() {
             .then(res => res.json())
             .then((fonts: CustomFont[]) => {
                 setCustomFonts(fonts);
-                // Inject styles
                 const styleId = 'dynamic-fonts';
                 let styleEl = document.getElementById(styleId);
                 if (!styleEl) {
@@ -244,7 +292,7 @@ function TemplateEditorContent() {
         setIsResizing(false);
     };
 
-    // Touch Handling
+    // Touch Handling (Simplified for brevity, same logic as mouse)
     const getTouchCoordinates = (e: React.TouchEvent) => {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
@@ -257,55 +305,9 @@ function TemplateEditorContent() {
             y: (touch.clientY - rect.top) * scaleY
         };
     };
-
-    const handleTouchStart = (e: React.TouchEvent) => {
-        e.preventDefault();
-        const { x, y } = getTouchCoordinates(e);
-
-        if (selectedFieldId) {
-            const field = fields.find(f => f.id === selectedFieldId);
-            if (field) {
-                const handleX = field.x + field.width;
-                if (x >= handleX - 20 && x <= handleX + 20 && y >= field.y - 10 && y <= field.y + field.fontSize + 10) {
-                    setIsResizing(true);
-                    return;
-                }
-            }
-        }
-
-        for (let i = fields.length - 1; i >= 0; i--) {
-            const f = fields[i];
-            if (x >= f.x && x <= f.x + f.width && y >= f.y && y <= f.y + f.fontSize * 1.2) {
-                setSelectedFieldId(f.id);
-                setIsDragging(true);
-                setDragOffset({ x: x - f.x, y: y - f.y });
-                return;
-            }
-        }
-        setSelectedFieldId(null);
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        e.preventDefault();
-        if (!isDragging && !isResizing) return;
-        const { x, y } = getTouchCoordinates(e);
-
-        if (isDragging && selectedFieldId) {
-            updateField(selectedFieldId, { x: x - dragOffset.x, y: y - dragOffset.y });
-        }
-        if (isResizing && selectedFieldId) {
-            const field = fields.find(f => f.id === selectedFieldId);
-            if (field) {
-                const newWidth = Math.max(50, x - field.x);
-                updateField(selectedFieldId, { width: newWidth });
-            }
-        }
-    };
-
-    const handleTouchEnd = () => {
-        setIsDragging(false);
-        setIsResizing(false);
-    };
+    const handleTouchStart = (e: React.TouchEvent) => { e.preventDefault(); handleMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any); };
+    const handleTouchMove = (e: React.TouchEvent) => { e.preventDefault(); handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } as any); };
+    const handleTouchEnd = () => handleMouseUp();
 
     const draw = () => {
         const canvas = canvasRef.current;
@@ -336,13 +338,13 @@ function TemplateEditorContent() {
 
             if (isSelected) {
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#3b82f6';
+                ctx.strokeStyle = '#6366f1'; // Indigo-500
                 ctx.setLineDash([5, 5]);
                 ctx.strokeRect(field.x - 5, field.y - 5, field.width + 10, field.fontSize + 10);
                 ctx.setLineDash([]);
 
                 // Resize handle
-                ctx.fillStyle = '#3b82f6';
+                ctx.fillStyle = '#6366f1';
                 ctx.beginPath();
                 ctx.arc(field.x + field.width + 5, field.y + field.fontSize / 2, 8, 0, Math.PI * 2);
                 ctx.fill();
@@ -350,9 +352,7 @@ function TemplateEditorContent() {
         });
     };
 
-    useEffect(() => {
-        draw();
-    }, [fields, selectedFieldId]);
+    useEffect(() => { draw(); }, [fields, selectedFieldId]);
 
     const saveTemplate = async () => {
         if (!name || !image) {
@@ -373,244 +373,284 @@ function TemplateEditorContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(template),
             });
-            if (res.ok) {
-                router.push('/admin');
-            } else {
-                alert('Save failed');
-            }
+            if (res.ok) router.push('/admin');
+            else alert('Save failed');
         } catch (err) {
             alert('Save failed');
         }
     };
 
     const selectedField = fields.find(f => f.id === selectedFieldId);
-
     if (!isAuthenticated) return null;
 
     return (
-        <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-slate-100 to-indigo-100 p-4 lg:p-8">
-            <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        <div className="min-h-screen bg-[#FAFAFA] font-sans selection:bg-indigo-500/10 selection:text-indigo-700">
+            <BackgroundEffects />
 
-                {/* Left Column: Canvas Area */}
-                <div className="lg:col-span-8 space-y-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/50 shadow-sm">
-                        <div>
-                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
-                                {id ? 'Edit Template' : 'New Template'}
-                            </h1>
-                            <p className="text-sm text-slate-500">Design your certificate or card</p>
-                        </div>
-                        <button
-                            onClick={saveTemplate}
-                            className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-8 py-2.5 rounded-full hover:shadow-lg hover:shadow-indigo-500/30 transition-all font-semibold active:scale-95"
-                        >
-                            Save Template
-                        </button>
-                    </div>
-
-                    <div className="bg-white/40 backdrop-blur-xl p-4 lg:p-8 rounded-3xl border border-white/60 shadow-xl shadow-indigo-100/50">
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">Template Name</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full bg-white/50 border border-indigo-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"
-                                placeholder="e.g. Certificate of Achievement"
-                            />
-                        </div>
-
-                        <div className="mt-6">
-                            {!image ? (
-                                <div className="border-3 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50/50 rounded-2xl p-12 text-center transition-all cursor-pointer group">
-                                    <input
-                                        type="file"
-                                        id="file-upload"
-                                        className="hidden"
-                                        onChange={handleFileUpload}
-                                        accept="image/*"
-                                    />
-                                    <label htmlFor="file-upload" className="cursor-pointer block">
-                                        <div className="w-16 h-16 bg-white rounded-2xl shadow-sm text-indigo-500 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                        </div>
-                                        <span className="text-lg font-semibold text-indigo-900">Upload Base Image</span>
-                                        <p className="text-sm text-indigo-400 mt-1">Click to select a certificate or card background</p>
-                                    </label>
-                                </div>
-                            ) : (
-                                <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/50 bg-slate-800 ring-4 ring-white">
-                                    <div className="overflow-auto max-h-[60vh] flex justify-center bg-[url('/grid.svg')]">
-                                        <canvas
-                                            ref={canvasRef}
-                                            onMouseDown={handleMouseDown}
-                                            onMouseMove={handleMouseMove}
-                                            onMouseUp={handleMouseUp}
-                                            onMouseLeave={handleMouseUp}
-                                            onTouchStart={handleTouchStart}
-                                            onTouchMove={handleTouchMove}
-                                            onTouchEnd={handleTouchEnd}
-                                            className={`max-w-full h-auto ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'}`}
-                                            style={{ touchAction: 'none' }}
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={() => setImage(null)}
-                                        className="absolute top-4 right-4 bg-white/90 backdrop-blur text-red-500 p-2 rounded-xl shadow-lg hover:bg-red-50 transition"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+            {/* Top Bar */}
+            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 h-16 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-4">
+                    <Link href="/admin" className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all">
+                        <Icons.Back />
+                    </Link>
+                    <div className="h-6 w-px bg-slate-200" />
+                    <div>
+                        <h1 className="text-lg font-bold text-slate-900 leading-tight">
+                            {id ? 'Edit Template' : 'New Design'}
+                        </h1>
+                        <p className="text-xs text-slate-500">Professional Certificate Studio</p>
                     </div>
                 </div>
 
-                {/* Right Column: Controls */}
-                <div className="lg:col-span-4 space-y-6">
-                    <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-white/50 shadow-xl shadow-indigo-100/50 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto custom-scrollbar">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-                                <span className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center text-sm">Tt</span>
-                                Text Fields
-                            </h2>
+                <div className="flex items-center gap-3">
+                    <div className="hidden md:block">
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Template Name..."
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-64 transition-all"
+                        />
+                    </div>
+                    <button
+                        onClick={saveTemplate}
+                        className="flex items-center bg-indigo-600 text-white px-5 py-2 rounded-full font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all active:scale-95"
+                    >
+                        <Icons.Save /> Save
+                    </button>
+                </div>
+            </header>
+
+            <div className="relative z-10 max-w-[1800px] mx-auto p-4 lg:p-6 h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                {/* Left: Canvas Area */}
+                <div className="lg:col-span-8 flex flex-col h-full gap-4">
+                    {/* Mobile Name Input (visible only on mobile) */}
+                    <div className="md:hidden">
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Template Name..."
+                            className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                        />
+                    </div>
+
+                    <div className="flex-1 bg-white/50 backdrop-blur rounded-3xl border border-slate-200/60 shadow-sm relative overflow-hidden flex items-center justify-center p-8 group">
+                        {/* Grid Pattern Background */}
+                        <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
+                        {!image ? (
+                            <div className="text-center">
+                                <label className="relative cursor-pointer group flex flex-col items-center justify-center w-full max-w-lg mx-auto p-12 border-3 border-dashed border-slate-300 rounded-3xl hover:border-indigo-500 hover:bg-indigo-50/50 transition-all duration-300">
+                                    <div className="w-20 h-20 bg-white rounded-2xl shadow-md flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                        <Icons.Image />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-800">Upload Base Design</h3>
+                                    <p className="text-slate-500 mt-2 text-sm">Drag & drop your certificate image or click to browse</p>
+                                    <p className="text-xs text-slate-400 mt-6 uppercase tracking-wider font-semibold">Supports PNG, JPG (High Res)</p>
+                                    <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
+                                </label>
+                            </div>
+                        ) : (
+                            <div className="relative shadow-2xl shadow-slate-900/10 rounded-lg overflow-hidden ring-1 ring-slate-900/5 max-h-full max-w-full">
+                                <canvas
+                                    ref={canvasRef}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseUp={handleMouseUp}
+                                    onMouseLeave={handleMouseUp}
+                                    onTouchStart={handleTouchStart}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={handleTouchEnd}
+                                    className={`block max-w-full max-h-[80vh] w-auto h-auto object-contain ${isDragging ? 'cursor-move' : isResizing ? 'cursor-ew-resize' : 'cursor-default'}`}
+                                />
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => setImage(null)}
+                                        className="bg-white text-red-500 p-2 rounded-lg shadow-lg hover:bg-red-50 transition border border-slate-100"
+                                        title="Remove Image"
+                                    >
+                                        <Icons.Trash />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Bottom Toolbar (Canvas Actions) */}
+                    {image && (
+                        <div className="flex justify-between items-center bg-white rounded-2xl p-3 px-6 shadow-sm border border-slate-200">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Canvas Actions</span>
+                            <div className="flex gap-4">
+                                <button className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Zoom In</button>
+                                <button className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">Zoom Out</button>
+                                <button className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors" onClick={() => {
+                                    if (imgRef.current) {
+                                        canvasRef.current!.width = imgRef.current.width;
+                                        draw();
+                                    }
+                                }}>Reset View</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Right: Properties Panel */}
+                <div className="lg:col-span-4 h-full overflow-y-auto pr-1 pb-10 custom-scrollbar">
+                    <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 flex flex-col overflow-hidden min-h-full">
+
+                        {/* Panel Header */}
+                        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h2 className="font-bold text-slate-800">Layers & Properties</h2>
                             <button
                                 onClick={addField}
-                                className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 active:scale-95"
+                                className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-semibold hover:border-indigo-500 hover:text-indigo-600 transition shadow-sm flex items-center"
                             >
-                                + Add Text
+                                <Icons.Plus /> Add Text
                             </button>
                         </div>
 
-                        <div className="space-y-3 mb-8">
-                            {fields.map(field => (
-                                <div
-                                    key={field.id}
-                                    onClick={() => setSelectedFieldId(field.id)}
-                                    className={`p-3 rounded-xl border transition-all cursor-pointer flex justify-between items-center ${selectedFieldId === field.id
-                                            ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500'
-                                            : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-2 h-8 rounded-full ${selectedFieldId === field.id ? 'bg-indigo-500' : 'bg-slate-300'}`} />
-                                        <span className="font-medium text-slate-700 truncate">{field.label}</span>
+                        {/* Layers List */}
+                        <div className="p-5 border-b border-slate-100 bg-white">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Layers</h3>
+                            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                {fields.length === 0 ? (
+                                    <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-xl">
+                                        <p className="text-sm text-slate-400">No text layers yet.</p>
                                     </div>
-                                    {selectedFieldId === field.id && (
-                                        <span className="text-xs bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded-full font-bold">Edit</span>
-                                    )}
-                                </div>
-                            ))}
-                            {fields.length === 0 && (
-                                <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed text-sm">
-                                    No fields added yet.<br />Click "+ Add Text" to start.
-                                </div>
-                            )}
+                                ) : (
+                                    fields.map(field => (
+                                        <div
+                                            key={field.id}
+                                            onClick={() => setSelectedFieldId(field.id)}
+                                            className={`p-3 rounded-xl border cursor-pointer flex justify-between items-center transition-all group ${selectedFieldId === field.id
+                                                ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500/20'
+                                                : 'border-slate-100 hover:border-indigo-200 hover:bg-slate-50'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${selectedFieldId === field.id ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-500'}`}>T</div>
+                                                <span className={`text-sm font-medium truncate ${selectedFieldId === field.id ? 'text-indigo-900' : 'text-slate-600'}`}>{field.label}</span>
+                                            </div>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); deleteField(field.id); }}
+                                                className={`p-1.5 rounded-md hover:bg-red-50 hover:text-red-500 transition-colors ${selectedFieldId === field.id ? 'text-indigo-300' : 'text-slate-300 opacity-0 group-hover:opacity-100'}`}
+                                            >
+                                                <Icons.Trash />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
 
-                        {selectedField && (
-                            <div className="space-y-5 animate-in slide-in-from-right-4 fade-in duration-200">
-                                <div className="border-t border-slate-200 pt-6">
-                                    <div className="flex justify-between items-end mb-4">
-                                        <h3 className="font-bold text-indigo-900">Edit Selected Field</h3>
-                                        <button
-                                            onClick={() => deleteField(selectedField.id)}
-                                            className="text-red-500 text-xs font-semibold hover:bg-red-50 px-2 py-1 rounded transition"
-                                        >
-                                            Delete
-                                        </button>
+                        {/* Properties Form */}
+                        {selectedField ? (
+                            <div className="p-6 space-y-6 bg-white animate-in slide-in-from-right-4 duration-300">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Text Content</label>
+                                    <input
+                                        type="text"
+                                        value={selectedField.label}
+                                        onChange={(e) => updateField(selectedField.id, { label: e.target.value })}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="col-span-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Font Family</label>
+                                        <div className="flex gap-2">
+                                            <select
+                                                value={selectedField.fontFamily}
+                                                onChange={(e) => updateField(selectedField.id, { fontFamily: e.target.value })}
+                                                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none appearance-none font-medium text-slate-700"
+                                            >
+                                                <option value="Arial">Arial</option>
+                                                <option value="Times New Roman">Times New Roman</option>
+                                                <option value="Courier New">Courier New</option>
+                                                {customFonts.map(font => (
+                                                    <option key={font.id} value={font.name} style={{ fontFamily: font.name }}>{font.name}</option>
+                                                ))}
+                                            </select>
+                                            <label className="bg-white border border-slate-200 text-slate-600 px-3 rounded-xl cursor-pointer hover:border-indigo-500 hover:text-indigo-600 transition flex items-center justify-center shadow-sm" title="Upload Custom Font">
+                                                <input type="file" className="hidden" accept=".ttf,.woff,.woff2" onChange={handleFontUpload} disabled={isFontUploading} />
+                                                <Icons.Plus />
+                                            </label>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Label Text</label>
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Size (px)</label>
+                                        <input
+                                            type="number"
+                                            value={selectedField.fontSize}
+                                            onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Color</label>
+                                        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2">
                                             <input
-                                                type="text"
-                                                value={selectedField.label}
-                                                onChange={(e) => updateField(selectedField.id, { label: e.target.value })}
-                                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                                                type="color"
+                                                value={selectedField.color}
+                                                onChange={(e) => updateField(selectedField.id, { color: e.target.value })}
+                                                className="w-8 h-8 rounded-lg cursor-pointer border-none p-0 bg-transparent"
                                             />
-                                        </div>
-
-                                        {/* Font Family Selector */}
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Font Family</label>
-                                            <div className="flex gap-2">
-                                                <select
-                                                    value={selectedField.fontFamily}
-                                                    onChange={(e) => updateField(selectedField.id, { fontFamily: e.target.value })}
-                                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                                >
-                                                    <option value="Arial">Arial</option>
-                                                    <option value="Times New Roman">Times New Roman</option>
-                                                    <option value="Courier New">Courier New</option>
-                                                    {customFonts.map(font => (
-                                                        <option key={font.id} value={font.name} style={{ fontFamily: font.name }}>{font.name}</option>
-                                                    ))}
-                                                </select>
-                                                <label className="bg-indigo-50 text-indigo-600 px-3 py-2 rounded-lg cursor-pointer hover:bg-indigo-100 transition whitespace-nowrap text-sm font-bold flex items-center">
-                                                    <input type="file" className="hidden" accept=".ttf,.woff,.woff2" onChange={handleFontUpload} disabled={isFontUploading} />
-                                                    {isFontUploading ? '...' : '+ Font'}
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Font Size</label>
-                                                <input
-                                                    type="number"
-                                                    value={selectedField.fontSize}
-                                                    onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
-                                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Boldness ({selectedField.fontWeight || 400})</label>
-                                                <input
-                                                    type="range"
-                                                    min="100"
-                                                    max="900"
-                                                    step="100"
-                                                    value={selectedField.fontWeight || 400}
-                                                    onChange={(e) => updateField(selectedField.id, { fontWeight: parseInt(e.target.value) })}
-                                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 my-3"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Color</label>
-                                            <div className="flex gap-2 items-center">
-                                                <input
-                                                    type="color"
-                                                    value={selectedField.color}
-                                                    onChange={(e) => updateField(selectedField.id, { color: e.target.value })}
-                                                    className="w-10 h-10 border border-slate-200 rounded-lg cursor-pointer"
-                                                />
-                                                <span className="text-xs font-mono text-slate-500">{selectedField.color}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Alignment</label>
-                                            <div className="flex bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
-                                                {['left', 'center', 'right'].map((align) => (
-                                                    <button
-                                                        key={align}
-                                                        onClick={() => updateField(selectedField.id, { alignment: align as any })}
-                                                        className={`flex-1 py-1.5 rounded-md text-xs font-bold capitalize transition-all ${selectedField.alignment === align
-                                                                ? 'bg-indigo-100 text-indigo-700 shadow-sm'
-                                                                : 'text-slate-400 hover:text-slate-600'
-                                                            }`}
-                                                    >
-                                                        {align}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            <span className="text-xs font-mono text-slate-500 uppercase flex-1 text-center">{selectedField.color}</span>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Weight: {selectedField.fontWeight || 400}</label>
+                                    <input
+                                        type="range"
+                                        min="100"
+                                        max="900"
+                                        step="100"
+                                        value={selectedField.fontWeight || 400}
+                                        onChange={(e) => updateField(selectedField.id, { fontWeight: parseInt(e.target.value) })}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                    />
+                                    <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-medium">
+                                        <span>Thin</span>
+                                        <span>Regular</span>
+                                        <span>Bold</span>
+                                        <span>Heavy</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Alignment</label>
+                                    <div className="flex bg-slate-100 rounded-xl p-1">
+                                        {['left', 'center', 'right'].map((align) => (
+                                            <button
+                                                key={align}
+                                                onClick={() => updateField(selectedField.id, { alignment: align as any })}
+                                                className={`flex-1 py-2 rounded-lg flex justify-center transition-all ${selectedField.alignment === align
+                                                    ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5'
+                                                    : 'text-slate-400 hover:text-slate-600'
+                                                    }`}
+                                            >
+                                                {align === 'left' && <Icons.AlignLeft />}
+                                                {align === 'center' && <Icons.AlignCenter />}
+                                                {align === 'right' && <Icons.AlignRight />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-10 flex flex-col items-center justify-center text-center h-64 bg-slate-50/50">
+                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                                    <span className="text-2xl">👆</span>
+                                </div>
+                                <h3 className="font-bold text-slate-700">No Layer Selected</h3>
+                                <p className="text-sm text-slate-400 mt-1 max-w-[200px]">Click on a text layer in the canvas or list to edit its properties.</p>
                             </div>
                         )}
                     </div>
