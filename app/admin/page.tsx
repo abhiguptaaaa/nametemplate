@@ -7,16 +7,119 @@ import { Template } from '@/lib/storage';
 export default function AdminDashboard() {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
+        // Check if already authenticated
+        const auth = sessionStorage.getItem('adminAuth');
+        if (auth === 'true') {
+            setIsAuthenticated(true);
+            loadTemplates();
+        } else {
+            setLoading(false);
+        }
+    }, []);
+
+    const loadTemplates = () => {
         fetch('/api/templates')
             .then(res => res.json())
             .then(data => {
                 setTemplates(data);
                 setLoading(false);
             });
-    }, []);
+    };
 
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        // Check credentials
+        if (username === 'abhi' && password === 'abHI0905@@') {
+            sessionStorage.setItem('adminAuth', 'true');
+            setIsAuthenticated(true);
+            loadTemplates();
+        } else {
+            setError('Invalid username or password');
+        }
+    };
+
+    const handleLogout = () => {
+        sessionStorage.removeItem('adminAuth');
+        setIsAuthenticated(false);
+        setUsername('');
+        setPassword('');
+    };
+
+    // Login Form
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+                <div className="w-full max-w-md">
+                    <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 p-8">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h1 className="text-2xl font-bold text-slate-900">Admin Login</h1>
+                            <p className="text-slate-500 mt-2">Enter your credentials to continue</p>
+                        </div>
+
+                        <form onSubmit={handleLogin} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                                    placeholder="Enter username"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                                    placeholder="Enter password"
+                                    required
+                                />
+                            </div>
+
+                            {error && (
+                                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                                    {error}
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition font-semibold shadow-lg shadow-indigo-200"
+                            >
+                                Sign In
+                            </button>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <Link href="/" className="text-sm text-slate-500 hover:text-indigo-600 transition">
+                                ← Back to Home
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Admin Dashboard (authenticated)
     return (
         <div className="min-h-screen bg-slate-50 p-8">
             <div className="max-w-6xl mx-auto">
@@ -26,6 +129,12 @@ export default function AdminDashboard() {
                         <p className="text-slate-500 mt-1">Manage your templates and designs</p>
                     </div>
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={handleLogout}
+                            className="text-slate-500 hover:text-red-600 font-medium text-sm transition-colors"
+                        >
+                            Logout
+                        </button>
                         <Link href="/" className="text-slate-500 hover:text-indigo-600 font-medium text-sm transition-colors">
                             View Site
                         </Link>

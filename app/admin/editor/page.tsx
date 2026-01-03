@@ -18,6 +18,14 @@ function TemplateEditorContent() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
 
+    // Check authentication
+    useEffect(() => {
+        const auth = sessionStorage.getItem('adminAuth');
+        if (auth !== 'true') {
+            router.push('/admin');
+        }
+    }, [router]);
+
     useEffect(() => {
         if (id) {
             fetch('/api/templates')
@@ -54,6 +62,11 @@ function TemplateEditorContent() {
                 body: formData,
             });
             const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Upload failed');
+            }
+
             if (data.imageUrl) {
                 setImage(data.imageUrl);
                 const img = new Image();
@@ -62,13 +75,17 @@ function TemplateEditorContent() {
                     imgRef.current = img;
                     draw();
                 };
+            } else {
+                throw new Error('No image URL returned from server');
             }
         } catch (err) {
-            alert('Upload failed');
+            console.error('Upload error:', err);
+            alert(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
         } finally {
             setIsUploading(false);
         }
     };
+
 
     const addField = () => {
         const newField: TemplateField = {
