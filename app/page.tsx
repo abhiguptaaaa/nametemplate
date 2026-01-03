@@ -200,7 +200,7 @@ export default function Home() {
                 <Link
                   key={template.id}
                   href={`/create/${template.id}`}
-                  className="group relative flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-1"
+                  className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* Image Container */}
                   <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
@@ -209,30 +209,26 @@ export default function Home() {
                       alt={template.name}
                       className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
                     />
-
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors duration-300" />
-
-                    {/* Floating Action Button */}
-                    <div className="absolute bottom-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                      <span className="bg-white text-slate-900 px-4 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center">
-                        Use Template <Icons.ArrowRight />
-                      </span>
-                    </div>
+                    <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/10 transition-colors duration-300" />
                   </div>
 
                   {/* Card Body */}
                   <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-xl text-slate-900 group-hover:text-indigo-600 transition-colors">{template.name}</h3>
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-bold text-xl text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">{template.name}</h3>
                       {idx < 2 && (
-                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">New</span>
+                        <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-indigo-100">New</span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-500 mt-auto pt-4 border-t border-slate-50 flex items-center">
+
+                    <div className="flex items-center text-sm text-slate-500 mb-6">
                       <Icons.Sparkles />
-                      <span className="ml-2">{template.fields.length} Smart Fields</span>
-                    </p>
+                      <span className="ml-2">{template.fields.length} Editable Fields</span>
+                    </div>
+
+                    <div className="mt-auto w-full bg-slate-50 text-slate-900 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-200 group-hover:border-indigo-600">
+                      Use Template <Icons.ArrowRight />
+                    </div>
                   </div>
                 </Link>
               ))}
