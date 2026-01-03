@@ -109,9 +109,9 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href="#templates" className="px-8 py-4 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 text-center">
+                <Link href="/templates" className="px-8 py-4 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 text-center">
                   Browse Templates
-                </a>
+                </Link>
                 <a href="#how-it-works" className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold hover:bg-slate-50 transition-all hover:border-slate-300 text-center">
                   How it Works
                 </a>
@@ -195,44 +195,52 @@ export default function Home() {
               <p className="text-slate-500 mt-2 max-w-sm mx-auto">It looks quiet here. Check back later or ask an admin to upload new designs.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {templates.map((template, idx) => (
-                <Link
-                  key={template.id}
-                  href={`/create/${template.id}`}
-                  className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
-                >
-                  {/* Image Container */}
-                  <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
-                    <img
-                      src={template.imageUrl}
-                      alt={template.name}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/10 transition-colors duration-300" />
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-xl text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">{template.name}</h3>
-                      {idx < 2 && (
-                        <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-indigo-100">New</span>
-                      )}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {templates.slice(0, 3).map((template, idx) => (
+                  <Link
+                    key={template.id}
+                    href={`/create/${template.id}`}
+                    className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
+                  >
+                    {/* Image Container */}
+                    <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
+                      <img
+                        src={template.imageUrl}
+                        alt={template.name}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/10 transition-colors duration-300" />
                     </div>
 
-                    <div className="flex items-center text-sm text-slate-500 mb-6">
-                      <Icons.Sparkles />
-                      <span className="ml-2">{template.fields.length} Editable Fields</span>
-                    </div>
+                    {/* Card Body */}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-bold text-xl text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">{template.name}</h3>
+                        {idx < 2 && (
+                          <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-indigo-100">New</span>
+                        )}
+                      </div>
 
-                    <div className="mt-auto w-full bg-slate-50 text-slate-900 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-200 group-hover:border-indigo-600">
-                      Use Template <Icons.ArrowRight />
+                      <div className="flex items-center text-sm text-slate-500 mb-6">
+                        <Icons.Sparkles />
+                        <span className="ml-2">{template.fields.length} Editable Fields</span>
+                      </div>
+
+                      <div className="mt-auto w-full bg-slate-50 text-slate-900 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-200 group-hover:border-indigo-600">
+                        Use Template <Icons.ArrowRight />
+                      </div>
                     </div>
-                  </div>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="text-center">
+                <Link href="/templates" className="inline-flex items-center gap-2 text-slate-900 font-bold hover:text-indigo-600 transition-colors border-b-2 border-slate-200 hover:border-indigo-600 pb-1">
+                  View All Designs <Icons.ArrowRight />
                 </Link>
-              ))}
-            </div>
+              </div>
+            </>
           )}
         </section>
       </main>
