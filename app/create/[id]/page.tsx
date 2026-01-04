@@ -421,7 +421,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                         <ThemeToggle />
                         <button
                             onClick={() => setIsBulkModalOpen(true)}
-                            className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all active:scale-95"
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all active:scale-95 relative"
                             title="Bulk Generate"
                         >
                             <BulkIcons.Sparkles />
