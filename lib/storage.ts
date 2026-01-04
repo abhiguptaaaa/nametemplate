@@ -9,6 +9,7 @@ export interface TemplateField {
   fontFamily: string;
   color: string;
   alignment: 'left' | 'center' | 'right';
+  lineHeight?: number; // Multiplier, default 1.2
 }
 
 export interface Template {

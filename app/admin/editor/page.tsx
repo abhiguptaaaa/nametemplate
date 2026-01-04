@@ -325,6 +325,7 @@ function TemplateEditorContent() {
             fontFamily: 'Arial',
             color: '#000000',
             alignment: 'left',
+            lineHeight: 1.2,
         };
         setFields([...fields, newField]);
         setSelectedFieldId(newField.id);
@@ -362,7 +363,7 @@ function TemplateEditorContent() {
             const field = fields.find(f => f.id === selectedFieldId);
             if (field) {
                 const handleX = field.x + field.width;
-                if (x >= handleX - 20 && x <= handleX + 20 && y >= field.y - 10 && y <= field.y + field.fontSize + 10) {
+                if (x >= handleX - 20 && x <= handleX + 20 && y >= field.y - 10 && y <= field.y + 100) { // Larger hit area for resize handle
                     setIsResizing(true);
                     setResizeStart({
                         width: field.width,
@@ -376,7 +377,12 @@ function TemplateEditorContent() {
 
         for (let i = fields.length - 1; i >= 0; i--) {
             const f = fields[i];
-            if (x >= f.x && x <= f.x + f.width && y >= f.y && y <= f.y + f.fontSize * 1.2) {
+            // Simple bounding box check (approximate height for selection)
+            // For precise selection on multi-line, we'd need to pre-calculate height, 
+            // but checking a generous height is usually fine for selection.
+            const estimatedHeight = f.fontSize * (f.lineHeight || 1.2) * (f.label.split('\n').length + 1) + 50;
+
+            if (x >= f.x && x <= f.x + f.width && y >= f.y && y <= f.y + estimatedHeight) {
                 setSelectedFieldId(f.id);
                 setIsDragging(true);
                 setDragOffset({ x: x - f.x, y: y - f.y });
@@ -398,17 +404,11 @@ function TemplateEditorContent() {
             if (field) {
                 const deltaX = x - resizeStart.mouseX;
 
-                // Scale width
+                // Update WIDTH ONLY (Decoupled from Font Size)
                 const newWidth = Math.max(50, resizeStart.width + deltaX);
 
-                // Scale font size proportionally
-                // Ratio: NewWidth / OldWidth
-                const scale = newWidth / resizeStart.width;
-                const newFontSize = Math.max(10, Math.round(resizeStart.fontSize * scale));
-
                 updateField(selectedFieldId, {
-                    width: newWidth,
-                    fontSize: newFontSize
+                    width: newWidth
                 });
             }
         }
@@ -459,6 +459,27 @@ function TemplateEditorContent() {
         handleMouseUp();
     };
 
+
+    // Helper to wrap text
+    const getLines = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = ctx.measureText(currentLine + " " + word).width;
+            if (width < maxWidth) {
+                currentLine += " " + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    };
+
     const draw = () => {
         const canvas = canvasRef.current;
         if (!canvas || !imgRef.current) return;
@@ -477,26 +498,44 @@ function TemplateEditorContent() {
             ctx.fillStyle = field.color;
             const weight = field.fontWeight || 400;
             ctx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
-            ctx.textAlign = field.alignment;
             ctx.textBaseline = 'top';
 
-            let drawX = field.x;
-            if (field.alignment === 'center') drawX = field.x + field.width / 2;
-            if (field.alignment === 'right') drawX = field.x + field.width;
+            const lineHeight = field.fontSize * (field.lineHeight || 1.2);
+            const lines = getLines(ctx, field.label, field.width);
+            const totalHeight = lines.length * lineHeight;
 
-            ctx.fillText(field.label, drawX, field.y, field.width);
+            lines.forEach((line, index) => {
+                let drawX = field.x;
+                const lineWidth = ctx.measureText(line).width;
+
+                if (field.alignment === 'center') {
+                    // Center relative to the BOX width (field.width), not the text width
+                    // Center point is x + width/2. Text starts at center - lineWidth/2
+                    drawX = field.x + (field.width - lineWidth) / 2;
+                } else if (field.alignment === 'right') {
+                    // Right aligned relative to BOX width
+                    drawX = field.x + field.width - lineWidth;
+                }
+
+                // If using standard textAlign, we need to set the point correctly
+                // But since we are calculating lines manually, manual X placement is safer/clearer
+                ctx.textAlign = 'left';
+                ctx.fillText(line, drawX, field.y + (index * lineHeight));
+            });
+
 
             if (isSelected) {
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = '#6366f1';
                 ctx.setLineDash([5, 5]);
-                ctx.strokeRect(field.x - 5, field.y - 5, field.width + 10, field.fontSize + 10);
+                // Draw box around the defined width and calculated height
+                ctx.strokeRect(field.x - 5, field.y - 5, field.width + 10, totalHeight + 10);
                 ctx.setLineDash([]);
 
-                // Resize handle
+                // Resize handle (Right side, vertically centered)
                 ctx.fillStyle = '#6366f1';
                 ctx.beginPath();
-                ctx.arc(field.x + field.width + 5, field.y + field.fontSize / 2, 8, 0, Math.PI * 2);
+                ctx.arc(field.x + field.width + 5, field.y + totalHeight / 2, 8, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
@@ -806,10 +845,10 @@ function TemplateEditorContent() {
                                     </div>
 
                                     <div className="col-span-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
-                                            <span>Size</span>
-                                            <span className="text-indigo-600">{selectedField.fontSize}px</span>
-                                        </label>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Size</label>
+                                            <span className="text-indigo-600 text-xs font-bold">{selectedField.fontSize}px</span>
+                                        </div>
                                         <div className="flex gap-2 items-center">
                                             <input
                                                 type="range"
@@ -819,11 +858,23 @@ function TemplateEditorContent() {
                                                 onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
                                                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                             />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Line Gap</label>
+                                            <span className="text-indigo-600 text-xs font-bold">{selectedField.lineHeight || 1.2}x</span>
+                                        </div>
+                                        <div className="flex gap-2 items-center">
                                             <input
-                                                type="number"
-                                                value={selectedField.fontSize}
-                                                onChange={(e) => updateField(selectedField.id, { fontSize: parseInt(e.target.value) })}
-                                                className="w-16 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-sm text-center outline-none"
+                                                type="range"
+                                                min="0.8"
+                                                max="3"
+                                                step="0.1"
+                                                value={selectedField.lineHeight || 1.2}
+                                                onChange={(e) => updateField(selectedField.id, { lineHeight: parseFloat(e.target.value) })}
+                                                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                             />
                                         </div>
                                     </div>

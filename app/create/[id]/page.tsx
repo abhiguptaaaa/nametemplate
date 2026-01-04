@@ -12,6 +12,26 @@ const BackgroundEffects = () => (
     </div>
 );
 
+// Helper to wrap text
+const getLines = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxWidth) {
+            currentLine += " " + word;
+        } else {
+            lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    lines.push(currentLine);
+    return lines;
+};
+
 export default function CreateTemplate({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
@@ -106,11 +126,22 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             ctx.textAlign = field.alignment;
             ctx.textBaseline = 'top';
 
-            let drawX = field.x;
-            if (field.alignment === 'center') drawX = field.x + field.width / 2;
-            if (field.alignment === 'right') drawX = field.x + field.width;
+            const lineHeight = field.fontSize * (field.lineHeight || 1.2);
+            const lines = getLines(ctx, text, field.width);
 
-            ctx.fillText(text, drawX, field.y, field.width);
+            lines.forEach((line, index) => {
+                let drawX = field.x;
+                const lineWidth = ctx.measureText(line).width;
+
+                if (field.alignment === 'center') {
+                    drawX = field.x + (field.width - lineWidth) / 2;
+                } else if (field.alignment === 'right') {
+                    drawX = field.x + field.width - lineWidth;
+                }
+
+                ctx.textAlign = 'left';
+                ctx.fillText(line, drawX, field.y + (index * lineHeight));
+            });
         });
     };
 
