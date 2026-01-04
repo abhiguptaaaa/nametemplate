@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Template } from '@/lib/storage';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Icons = {
     Sparkles: () => (
@@ -24,8 +26,8 @@ const Icons = {
 
 const BackgroundEffects = () => (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply animate-blob animation-delay-2000" />
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-100/40 dark:bg-blue-900/20 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob animation-delay-2000" />
     </div>
 );
 
@@ -47,21 +49,25 @@ export default function TemplatesPage() {
             <BackgroundEffects />
 
             {/* Header */}
-            <header className="fixed w-full top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60">
+            <header className="fixed w-full top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 shadow-sm supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60">
                 <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/" className="p-2 -ml-2 text-slate-500 hover:text-slate-900 hover:bg-black/5 rounded-full transition-all">
+                        <Link href="/" className="p-2 -ml-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </Link>
-                        <h1 className="text-xl font-bold text-slate-900">All Templates</h1>
+                        <div className="flex items-center gap-3">
+                            <Image src="/xcanvas-logo.png" alt="XCanvas" width={32} height={32} className="object-contain" />
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">All Templates</h1>
+                        </div>
                     </div>
+                    <ThemeToggle />
                 </div>
             </header>
 
             <main className="relative z-10 pt-28 pb-20 px-6 max-w-7xl mx-auto">
                 <div className="mb-10 text-center md:text-left">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Browse Collection</h2>
-                    <p className="text-slate-500 max-w-xl text-lg">Explore our diverse collection of professionally designed templates. Click 'Use Template' to customize.</p>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-4">Browse Collection</h2>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-xl text-lg">Explore our diverse collection of professionally designed templates. Click 'Use Template' to customize.</p>
                 </div>
 
                 {!loading && templates.length > 0 && (
@@ -81,10 +87,10 @@ export default function TemplatesPage() {
                         ))}
                     </div>
                 ) : templates.length === 0 ? (
-                    <div className="text-center py-32 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300">
+                    <div className="text-center py-32 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
                         <Icons.FolderOpen />
-                        <h3 className="text-xl font-bold text-slate-900">No Templates Found</h3>
-                        <p className="text-slate-500 mt-2 max-w-sm mx-auto">It looks quiet here. Check back later or ask an admin to upload new designs.</p>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">No Templates Found</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm mx-auto">It looks quiet here. Check back later or ask an admin to upload new designs.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
