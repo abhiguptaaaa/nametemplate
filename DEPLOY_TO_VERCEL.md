@@ -31,8 +31,11 @@ Vercel will automatically detect that this is a Next.js project. You should see:
 - **Output Directory:** `.next` (auto-filled)
 - **Install Command:** `pnpm install` (auto-detected from `pnpm-lock.yaml`)
 
-### Environment Variables (Optional)
-If your app needs any environment variables, add them here. For this basic name generator, you likely don't need any.
+### 3. Add Environment Variables
+Add the following environment variables in the Project Settings > Environment Variables:
+
+- `MONGODB_URI`: Your MongoDB connection string.
+- `GROQ_API_KEY`: Your Groq API Key (starts with `gsk_`).
 
 ## Step 4: Deploy!
 

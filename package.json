@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@vercel/kv": "^3.0.0",
+    "file-saver": "^2.0.5",
+    "groq-sdk": "^0.37.0",
     "ioredis": "^5.8.2",
+    "jszip": "^3.10.1",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -41,6 +41,11 @@ const Icons = {
         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
+    ),
+    Sparkles: () => (
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
     )
 };
 
@@ -231,12 +236,20 @@ export default function AdminDashboard() {
                         <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">Dashboard</h2>
                         <p className="text-slate-500 text-lg">Manage your design library and configurations.</p>
                     </div>
-                    <Link
-                        href="/admin/editor?new=true"
-                        className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-full font-semibold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all active:scale-95"
-                    >
-                        <Icons.Plus /> Create New Template
-                    </Link>
+                    <div className="flex gap-4">
+                        <Link
+                            href="/admin/bulk-generate"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-indigo-600 border border-indigo-200 rounded-full font-semibold shadow-sm hover:bg-indigo-50 hover:border-indigo-300 hover:-translate-y-0.5 transition-all active:scale-95"
+                        >
+                            <Icons.Sparkles /> Bulk Generate
+                        </Link>
+                        <Link
+                            href="/admin/editor?new=true"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-full font-semibold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all active:scale-95"
+                        >
+                            <Icons.Plus /> Create New Template
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Content Area */}
