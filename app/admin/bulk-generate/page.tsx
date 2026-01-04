@@ -5,7 +5,35 @@ import { useRouter } from 'next/navigation';
 import { getTemplates, Template } from '@/lib/storage';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import * as Icons from 'lucide-react';
+
+// Inline SVG Icons
+const Icons = {
+    ArrowLeft: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+    ),
+    UploadCloud: () => (
+        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+    ),
+    Loader2: ({ className }: { className?: string }) => (
+        <svg className={className || "w-5 h-5 animate-spin"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+    ),
+    Sparkles: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+    ),
+    Download: () => (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+    )
+};
 
 export default function BulkGeneratePage() {
     const router = useRouter();
@@ -192,7 +220,7 @@ export default function BulkGeneratePage() {
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button onClick={() => router.back()} className="p-2 hover:bg-slate-100 rounded-lg transition">
-                            <Icons.ArrowLeft size={20} className="text-slate-600" />
+                            <Icons.ArrowLeft />
                         </button>
                         <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                             Bulk AI Generator
