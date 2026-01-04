@@ -123,7 +123,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     }, [fieldValues, template]);
 
     // Transliterate Hinglish to Hindi
-    const transliterateText = async (text: string, fieldId: string) => {
+    const transliterateText = async (text: string, signal: AbortSignal) => {
         if (!text || !hinglishConverterEnabled) {
             return text;
         }
@@ -133,6 +133,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text }),
+                signal,
             });
 
             if (!response.ok) {
@@ -141,27 +142,46 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
 
             const data = await response.json();
             return data.transliterated || text;
-        } catch (error) {
+        } catch (error: any) {
+            if (error.name === 'AbortError') {
+                return null; // Request cancelled
+            }
             console.error('Transliteration error:', error);
             return text;
         }
     };
 
-    // Handle input change with debounced transliteration
+    // Handle input change with debounced transliteration and race condition protection
+    const abortControllerRef = useRef<AbortController | null>(null);
+
     const handleInputChange = (fieldId: string, value: string) => {
         // Update immediately for responsive typing
-        setFieldValues({ ...fieldValues, [fieldId]: value });
+        setFieldValues(prev => ({ ...prev, [fieldId]: value }));
 
         // Debounce transliteration API call
         if (hinglishConverterEnabled && value.trim()) {
+            // Cancel previous pending request
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+
+            // Cancel previous timer
             if (debounceTimerRef.current) {
                 clearTimeout(debounceTimerRef.current);
             }
 
             debounceTimerRef.current = setTimeout(async () => {
-                const transliterated = await transliterateText(value, fieldId);
-                setFieldValues(prev => ({ ...prev, [fieldId]: transliterated }));
-            }, 300); // 300ms debounce
+                // Create new controller for this request
+                const controller = new AbortController();
+                abortControllerRef.current = controller;
+
+                const transliterated = await transliterateText(value, controller.signal);
+
+                // Only update if not cancelled (transliterateText returns null on abort)
+                if (transliterated !== null) {
+                    setFieldValues(prev => ({ ...prev, [fieldId]: transliterated }));
+                }
+            }, 1000); // 1.5s debounce to let user finish sentence
         }
     };
 
