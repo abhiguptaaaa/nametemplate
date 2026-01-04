@@ -274,14 +274,27 @@ export default function BulkGeneratePage() {
 
                     <div className="grid md:grid-cols-2 gap-8 items-start">
                         <div className="space-y-4">
-                            <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${imageFile ? 'border-indigo-500 bg-indigo-50/10' : 'border-slate-200 hover:border-indigo-300'}`}>
+                            <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${imageFile ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}>
                                 <input type="file" id="upload" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                                <label htmlFor="upload" className="cursor-pointer block">
-                                    <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                <label htmlFor="upload" className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-colors ${imageFile ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
                                         <Icons.UploadCloud />
                                     </div>
-                                    <p className="text-sm font-medium text-slate-700">Click to upload image</p>
-                                    <p className="text-xs text-slate-400 mt-1">PNG, JPG up to 10MB</p>
+                                    {imageFile ? (
+                                        <>
+                                            <p className="text-lg font-bold text-emerald-700">Image Selected!</p>
+                                            <p className="text-sm text-emerald-600 mt-1">{imageFile.name}</p>
+                                            <p className="text-xs text-slate-400 mt-4">(Click to change image)</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-lg font-bold text-slate-700 mb-2">Upload List Image</p>
+                                            <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">
+                                                Select Image File
+                                            </span>
+                                            <p className="text-xs text-slate-400 mt-4">Takes clear photos of name lists (PNG/JPG)</p>
+                                        </>
+                                    )}
                                 </label>
                             </div>
                             {imageFile && (

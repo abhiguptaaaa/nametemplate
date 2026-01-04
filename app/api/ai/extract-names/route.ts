@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
                     content: [
                         {
                             type: 'text',
-                            text: 'Analyze this image and identify all names (and surnames) listed. Return strictly a JSON object with a single key "names" containing an array of strings. Do not return any other text or markdown formatting. Example: {"names": ["John Doe", "Jane Smith"]}.'
+                            text: 'Extract EVERY single name found in this image. This is a list of names for certificates. \n\nRules:\n1. Extract all names strictly as they appear.\n2. Ignore row numbers, dates, titles (like "List of Participants"), or other metadata.\n3. Return strictly a valid JSON object with a single key "names" which is an array of strings.\n4. Do not miss any names.\n\nExample Output Format: {"names": ["Name One", "Name Two"]}'
                         },
                         {
                             type: 'image_url',
@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
                     ]
                 }
             ],
-            model: 'llama-3.2-11b-vision-preview', // Or 90b if available/needed
-            temperature: 0,
+            model: 'llama-3.2-11b-vision-preview',
+            temperature: 0.1, // Slight temp to allow for better reading of complex fonts? No, 0 is usually best for determinstic extraction. Keeping low. 
             response_format: { type: 'json_object' }
         });
 
