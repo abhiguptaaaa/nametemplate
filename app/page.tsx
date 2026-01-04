@@ -109,20 +109,20 @@ export default function Home() {
                 <span className="text-sm font-medium text-slate-600">Template Engine v2.0</span>
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-[1.1] mb-6">
                 Design <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient-x">Excellence</span> <br />
                 Made Simple.
               </h1>
 
-              <p className="text-lg md:text-xl text-slate-600 mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
+              <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
                 Create professional certificates, ID cards, and social assets in seconds. Select a template, personalize fields, and export.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/templates" className="px-8 py-4 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 text-center">
+                <Link href="/templates" className="px-8 py-4 bg-slate-900 dark:bg-indigo-600 text-white rounded-full font-semibold hover:bg-slate-800 dark:hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 text-center">
                   Browse Templates
                 </Link>
-                <a href="#how-it-works" className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-semibold hover:bg-slate-50 transition-all hover:border-slate-300 text-center">
+                <a href="#how-it-works" className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-full font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all hover:border-slate-300 dark:hover:border-slate-600 text-center">
                   How it Works
                 </a>
               </div>
@@ -144,7 +144,7 @@ export default function Home() {
                   <div className="h-32 w-full bg-slate-50 rounded-xl border border-dashed border-slate-200 mt-8"></div>
                 </div>
               </div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-slate-900 rounded-2xl shadow-xl rotate-[6deg] opacity-10 z-0 scale-95"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-slate-900 dark:bg-indigo-950 rounded-2xl shadow-xl rotate-[6deg] opacity-10 z-0 scale-95"></div>
             </div>
           </div>
         </section>

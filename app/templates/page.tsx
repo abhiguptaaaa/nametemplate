@@ -45,18 +45,20 @@ export default function TemplatesPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-500/10 selection:text-indigo-700">
+        <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
             <BackgroundEffects />
 
             {/* Header */}
-            <header className="fixed w-full top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 shadow-sm supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60">
+            <header className="fixed w-full top-0 z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 shadow-sm transition-all duration-200">
                 <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/" className="p-2 -ml-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-all">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                        <Link href="/" className="p-2 -ml-2 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
+                            <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </Link>
                         <div className="flex items-center gap-3">
-                            <Image src="/xcanvas-logo.png" alt="XCanvas" width={32} height={32} className="object-contain" />
+                            <div className="w-8 h-8 relative flex-shrink-0">
+                                <img src="/xcanvas-logo.png" alt="XCanvas" className="w-full h-full object-contain" />
+                            </div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">All Templates</h1>
                         </div>
                     </div>
@@ -64,10 +66,14 @@ export default function TemplatesPage() {
                 </div>
             </header>
 
-            <main className="relative z-10 pt-28 pb-20 px-6 max-w-7xl mx-auto">
-                <div className="mb-10 text-center md:text-left">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-4">Browse Collection</h2>
-                    <p className="text-slate-500 dark:text-slate-400 max-w-xl text-lg">Explore our diverse collection of professionally designed templates. Click 'Use Template' to customize.</p>
+            <main className="relative z-10 pt-24 md:pt-32 pb-20 px-6 max-w-7xl mx-auto min-h-screen">
+                <div className="text-center max-w-2xl mx-auto mb-16">
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-4">
+                        Browse Collection
+                    </h2>
+                    <p className="text-lg text-slate-600 dark:text-slate-400">
+                        Choose from our professionally designed templates to get started.
+                    </p>
                 </div>
 
                 {!loading && templates.length > 0 && (
@@ -98,10 +104,10 @@ export default function TemplatesPage() {
                             <Link
                                 key={template.id}
                                 href={`/create/${template.id}`}
-                                className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
+                                className="group flex flex-col bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                             >
                                 {/* Image Container */}
-                                <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden flex items-center justify-center p-4">
+                                <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden flex items-center justify-center p-4">
                                     <img
                                         src={template.imageUrl}
                                         alt={template.name}
@@ -114,18 +120,18 @@ export default function TemplatesPage() {
                                 {/* Card Body */}
                                 <div className="p-6 flex flex-col flex-grow">
                                     <div className="flex justify-between items-start mb-3">
-                                        <h3 className="font-bold text-xl text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">{template.name}</h3>
+                                        <h3 className="font-bold text-xl text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{template.name}</h3>
                                         {idx < 2 && (
                                             <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-indigo-100">New</span>
                                         )}
                                     </div>
 
-                                    <div className="flex items-center text-sm text-slate-500 mb-6">
+                                    <div className="flex items-center text-sm text-slate-500 dark:text-slate-400 mb-6">
                                         <Icons.Sparkles />
                                         <span className="ml-2">{template.fields.length} Editable Fields</span>
                                     </div>
 
-                                    <div className="mt-auto w-full bg-slate-50 text-slate-900 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-200 group-hover:border-indigo-600">
+                                    <div className="mt-auto w-full bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-slate-200 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 dark:group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 group-hover:border-indigo-600">
                                         Use Template <Icons.ArrowRight />
                                     </div>
                                 </div>
