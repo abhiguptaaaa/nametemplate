@@ -261,7 +261,7 @@ export default function AdminDashboard() {
                             </div>
                         ))}
                     </div>
-                ) : templates.length === 0 ? (
+                ) : !loading && templates.length === 0 ? (
                     <div className="text-center py-32 bg-white/60 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto">
                         <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-600">
                             <Icons.Plus />
@@ -280,11 +280,11 @@ export default function AdminDashboard() {
                         {templates.map(template => (
                             <div key={template.id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 border border-slate-200 flex flex-col">
                                 {/* Preview Image */}
-                                <div className="aspect-[16/9] bg-slate-100 relative overflow-hidden">
+                                <div className="aspect-[16/9] bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden flex items-center justify-center p-4">
                                     <img
                                         src={template.imageUrl}
                                         alt={template.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-700"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 </div>
