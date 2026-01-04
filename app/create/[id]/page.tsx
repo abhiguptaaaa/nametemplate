@@ -20,9 +20,11 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
     const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
+    const [hinglishConverterEnabled, setHinglishConverterEnabled] = useState(true); // ON by default
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Fetch fonts and template
     useEffect(() => {
@@ -120,6 +122,49 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
         }
     }, [fieldValues, template]);
 
+    // Transliterate Hinglish to Hindi
+    const transliterateText = async (text: string, fieldId: string) => {
+        if (!text || !hinglishConverterEnabled) {
+            return text;
+        }
+
+        try {
+            const response = await fetch('/api/transliterate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text }),
+            });
+
+            if (!response.ok) {
+                return text;
+            }
+
+            const data = await response.json();
+            return data.transliterated || text;
+        } catch (error) {
+            console.error('Transliteration error:', error);
+            return text;
+        }
+    };
+
+    // Handle input change with debounced transliteration
+    const handleInputChange = (fieldId: string, value: string) => {
+        // Update immediately for responsive typing
+        setFieldValues({ ...fieldValues, [fieldId]: value });
+
+        // Debounce transliteration API call
+        if (hinglishConverterEnabled && value.trim()) {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+
+            debounceTimerRef.current = setTimeout(async () => {
+                const transliterated = await transliterateText(value, fieldId);
+                setFieldValues(prev => ({ ...prev, [fieldId]: transliterated }));
+            }, 300); // 300ms debounce
+        }
+    };
+
     const handleDownload = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -182,6 +227,38 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                 <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 text-sm">✍️</span>
                                 Personalize
                             </h2>
+
+                            {/* Hinglish Converter Toggle */}
+                            <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                        <h3 className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                            <span className="text-base">🔤</span>
+                                            Hinglish to Hindi Converter
+                                        </h3>
+                                        <p className="text-xs text-slate-600">Auto-convert English text to Hindi script</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setHinglishConverterEnabled(!hinglishConverterEnabled)}
+                                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${hinglishConverterEnabled ? 'bg-indigo-600' : 'bg-slate-300'
+                                            }`}
+                                        role="switch"
+                                        aria-checked={hinglishConverterEnabled}
+                                    >
+                                        <span
+                                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${hinglishConverterEnabled ? 'translate-x-6' : 'translate-x-1'
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
+                                {hinglishConverterEnabled && (
+                                    <div className="mt-3 pt-3 border-t border-indigo-200">
+                                        <p className="text-xs text-indigo-700 font-medium animate-in fade-in duration-300">
+                                            ✓ Converter is ON - Type in Hinglish (e.g., "namaste" → "नमस्ते")
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                             <div className="space-y-5">
                                 {template.fields.map(field => (
                                     <div key={field.id} className="group relative">
@@ -191,9 +268,9 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                         <input
                                             type="text"
                                             value={fieldValues[field.id]}
-                                            onChange={(e) => setFieldValues({ ...fieldValues, [field.id]: e.target.value })}
+                                            onChange={(e) => handleInputChange(field.id, e.target.value)}
                                             className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-all shadow-sm"
-                                            placeholder={`Enter ${field.label}`}
+                                            placeholder={hinglishConverterEnabled ? `Type in Hinglish or Hindi` : `Enter ${field.label}`}
                                         />
                                         <label className="absolute -top-2 left-3 inline-block bg-white px-1 text-xs font-bold text-slate-500 group-focus-within:text-indigo-600 transition-colors">
                                             {field.label}
