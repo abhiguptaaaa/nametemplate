@@ -362,8 +362,33 @@ function TemplateEditorContent() {
         if (selectedFieldId) {
             const field = fields.find(f => f.id === selectedFieldId);
             if (field) {
+                // Calculate total height for handle position
+                const lineHeight = field.fontSize * (field.lineHeight || 1.2);
+                // We need a temporary ctx to measure lines, or just estimate. 
+                // Since we can't easily get ctx here without refactoring, we'll try to get it from canvasRef or just use a generous hit area based on standard flow.
+                // Better approach: Store computed height in state or field? 
+                // For now, let's just use the rendered visual check or a "smart" hit area.
+                // Actually, let's use the same estimation as the bounding box check or render loop.
+
+                // Let's assume the user clicks near the visual handle we draw.
+                // We'll update the draw loop to store the last calculated height, OR we interpret clicks relative to (x + width, y + height).
+                // But we don't know height here easily.
+
+                // Workaround: Check if click is near right edge (for width resize).
+                // User wants "expand vertically", which implies dragging the corner.
+
                 const handleX = field.x + field.width;
-                if (x >= handleX - 20 && x <= handleX + 20 && y >= field.y - 10 && y <= field.y + 100) { // Larger hit area for resize handle
+                // We'll check X range mainly. Y range is tricky without height.
+                // But since we want "Vertical" feel, we should try to support typical resize behavior.
+
+                // Let's rely on the fact that if they click the "handle", it's usually visible.
+                // We can check if they are clicking the visually rendered handle? 
+                // The canvas event gives coordinates.
+
+                // Let's broaden the hit area to be "Right Edge" + "Bottom Edge vicinity"
+                // Or just:
+                if (x >= handleX - 20 && x <= handleX + 30 && y >= field.y - 10) {
+                    // Allow resize if clicking anywhere on the right side/strip
                     setIsResizing(true);
                     setResizeStart({
                         width: field.width,
@@ -532,10 +557,10 @@ function TemplateEditorContent() {
                 ctx.strokeRect(field.x - 5, field.y - 5, field.width + 10, totalHeight + 10);
                 ctx.setLineDash([]);
 
-                // Resize handle (Right side, vertically centered)
+                // Resize handle (Bottom-Right Corner)
                 ctx.fillStyle = '#6366f1';
                 ctx.beginPath();
-                ctx.arc(field.x + field.width + 5, field.y + totalHeight / 2, 8, 0, Math.PI * 2);
+                ctx.arc(field.x + field.width + 5, field.y + totalHeight + 5, 8, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
