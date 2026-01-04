@@ -238,12 +238,6 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex gap-4">
                         <Link
-                            href="/admin/bulk-generate"
-                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-indigo-600 border border-indigo-200 rounded-full font-semibold shadow-sm hover:bg-indigo-50 hover:border-indigo-300 hover:-translate-y-0.5 transition-all active:scale-95"
-                        >
-                            <Icons.Sparkles /> Bulk Generate
-                        </Link>
-                        <Link
                             href="/admin/editor?new=true"
                             className="inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white rounded-full font-semibold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all active:scale-95"
                         >

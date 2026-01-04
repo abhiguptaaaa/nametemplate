@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getTemplates, Template } from '@/lib/storage';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -35,8 +35,11 @@ const Icons = {
     )
 };
 
-export default function BulkGeneratePage() {
+function BulkGenerateContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const preSelectedId = searchParams.get('templateId');
+
     const [templates, setTemplates] = useState<Template[]>([]);
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
     const [selectedFieldId, setSelectedFieldId] = useState<string>('');
@@ -57,10 +60,12 @@ export default function BulkGeneratePage() {
     useEffect(() => {
         const loaded = getTemplates();
         setTemplates(loaded);
-        if (loaded.length > 0) {
+        if (preSelectedId && loaded.some(t => t.id === preSelectedId)) {
+            setSelectedTemplateId(preSelectedId);
+        } else if (loaded.length > 0) {
             setSelectedTemplateId(loaded[0].id);
         }
-    }, []);
+    }, [preSelectedId]);
 
     const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
 
@@ -96,8 +101,10 @@ export default function BulkGeneratePage() {
             if (!res.ok) throw new Error('Extraction failed');
 
             const data = await res.json();
-            if (data.names && Array.isArray(data.names)) {
+            if (data.names && Array.isArray(data.names) && data.names.length > 0) {
                 setExtractedNames(data.names);
+            } else {
+                alert('No names found in the image. Please try a clearer image (crop to just the names if possible) or check the format.');
             }
         } catch (error) {
             console.error(error);
@@ -367,5 +374,13 @@ export default function BulkGeneratePage() {
             {/* Hidden Canvas for Processing */}
             <canvas ref={canvasRef} className="hidden" />
         </div>
+    );
+}
+
+export default function BulkGeneratePage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <BulkGenerateContent />
+        </Suspense>
     );
 }
