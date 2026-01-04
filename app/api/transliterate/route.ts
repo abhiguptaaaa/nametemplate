@@ -29,8 +29,16 @@ export async function POST(req: NextRequest) {
 
         // Extract the transliterated text from the response
         // Response format: [SUCCESS, [[text, [suggestions], metadata]]]
-        if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
-            const transliterated = data[1][0][1][0]; // First suggestion
+        if (data && data[0] === 'SUCCESS' && Array.isArray(data[1])) {
+            // Map over all segments to construct full sentence
+            // data[1] is an array of [original_token, [suggestions], ...]
+            const transliterated = data[1]
+                .map((segment: any) => {
+                    // Return first suggestion (segment[1][0]) or fallback to original token (segment[0])
+                    return (segment[1] && segment[1][0]) ? segment[1][0] : segment[0];
+                })
+                .join(''); // Join all segments (spaces/punctuation are usually their own segments or included)
+
             return NextResponse.json({
                 original: text,
                 transliterated: transliterated
