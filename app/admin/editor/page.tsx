@@ -670,8 +670,8 @@ function TemplateEditorContent() {
                 {/* Left: Canvas Area */}
                 <div className="lg:col-span-8 flex flex-col h-full gap-4">
 
-                    <div className="flex-1 bg-slate-100/50 backdrop-blur-sm rounded-3xl border border-slate-200/60 shadow-inner relative overflow-hidden flex items-center justify-center p-4 lg:p-8 group min-h-[50vh] lg:min-h-0 will-change-transform">
-                        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+                    <div className="flex-1 bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl border border-slate-200/60 dark:border-slate-700/60 shadow-inner relative overflow-hidden flex items-center justify-center p-4 lg:p-8 group min-h-[50vh] lg:min-h-0 will-change-transform">
+                        <div className="absolute inset-0 opacity-10 dark:opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
                         {/* Image Loading Spinner */}
                         {isUploading && (

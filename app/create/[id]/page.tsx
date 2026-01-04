@@ -387,11 +387,11 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     if (!template) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-indigo-500/10 selection:text-indigo-700">
+        <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
             <BackgroundEffects />
 
             {/* Header */}
-            <header className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60">
+            <header className="fixed w-full top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 shadow-sm supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 transition-all duration-200">
                 <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
                         <button
