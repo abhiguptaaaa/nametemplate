@@ -392,49 +392,50 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
 
             {/* Header */}
             <header className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60">
-                <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
                         <button
                             onClick={() => router.push('/')}
-                            className="p-2.5 -ml-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all group"
+                            className="p-2 sm:p-2.5 -ml-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all group flex-shrink-0"
                         >
-                            <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </button>
 
-                        <div className="flex flex-col">
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 bg-clip-text text-transparent leading-tight tracking-tight">
+                        <div className="flex flex-col min-w-0 flex-1">
+                            <h1 className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 bg-clip-text text-transparent leading-tight tracking-tight truncate">
                                 {template.name}
                             </h1>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="relative flex h-2 w-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5">
+                                <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 flex-shrink-0">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
                                 </span>
-                                <span className="text-xs font-semibold text-emerald-600/90 tracking-wide uppercase">Live Editor</span>
+                                <span className="text-[10px] sm:text-xs font-semibold text-emerald-600/90 tracking-wide uppercase">Live</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <button
                             onClick={() => setIsBulkModalOpen(true)}
-                            className="group relative px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-indigo-300 font-semibold rounded-full transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md hover:text-indigo-600 active:scale-95"
+                            className="group relative p-2 sm:px-4 sm:py-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-indigo-300 font-semibold rounded-full transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md hover:text-indigo-600 active:scale-95"
+                            title="Bulk Generate"
                         >
                             <BulkIcons.Sparkles />
-                            <span>Bulk Generate</span>
-                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="hidden sm:inline">Bulk</span>
+                            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 sm:h-3 sm:w-3">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                                <span className="relative inline-flex rounded-full h-full w-full bg-indigo-500"></span>
                             </span>
                         </button>
 
-                        <div className="h-8 w-px bg-slate-200 mx-2"></div>
+
 
                         <button
                             onClick={handleDownload}
-                            className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full shadow-lg shadow-slate-900/20 hover:shadow-slate-900/40 transition-all flex items-center gap-2 active:scale-95 group"
+                            className="px-3 sm:px-6 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full shadow-lg shadow-slate-900/20 hover:shadow-slate-900/40 transition-all flex items-center gap-1.5 sm:gap-2 active:scale-95 group text-sm"
                         >
-                            <span>Download PDF</span>
+                            <span className="hidden xs:inline">Download</span>
                             <BulkIcons.Download />
                         </button>
                     </div>
