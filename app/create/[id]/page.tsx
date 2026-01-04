@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Template, CustomFont } from '@/lib/storage';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 // Inline SVG Icons for Bulk Process
 const BulkIcons = {
@@ -396,7 +398,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
                         <button
                             onClick={() => router.push('/')}
-                            className="p-2 sm:p-2.5 -ml-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all group flex-shrink-0"
+                            className="p-2 sm:p-2.5 -ml-2 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all group flex-shrink-0"
                         >
                             <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </button>
@@ -414,11 +416,12 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                             </div>
                         </div>
                     </div>
-
+                    {/* Right Actions */}
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <ThemeToggle />
                         <button
                             onClick={() => setIsBulkModalOpen(true)}
-                            className="group relative p-2 sm:px-4 sm:py-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-indigo-300 font-semibold rounded-full transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md hover:text-indigo-600 active:scale-95"
+                            className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all active:scale-95"
                             title="Bulk Generate"
                         >
                             <BulkIcons.Sparkles />

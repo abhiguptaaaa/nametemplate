@@ -147,7 +147,7 @@ function TemplateEditorContent() {
                 }
                 const css = fonts.map(font => `
 @font-face {
-    font - family: '${font.name}';
+    font-family: '${font.name}';
     src: url('${font.dataUrl}');
 }
 `).join('\n');
@@ -609,20 +609,20 @@ function TemplateEditorContent() {
     if (!isAuthenticated) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] font-sans selection:bg-indigo-500/10 selection:text-indigo-700">
+        <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
             <BackgroundEffects />
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Top Bar */}
-            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm will-change-transform">
+            <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm will-change-transform transition-colors duration-200">
                 <div className="max-w-[1800px] mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                        <Link href="/admin" className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all flex-shrink-0">
+                        <Link href="/admin" className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all flex-shrink-0">
                             <Icons.Back />
                         </Link>
                         <div className="h-6 w-px bg-slate-200 hidden sm:block flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                            <h1 className="text-sm sm:text-lg font-bold text-slate-900 leading-tight truncate">
+                            <h1 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">
                                 {id ? 'Edit Template' : 'New Design'}
                             </h1>
                         </div>
@@ -631,7 +631,7 @@ function TemplateEditorContent() {
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <button
                             onClick={() => setIsLocked(!isLocked)}
-                            className={`p-2 sm:px-4 sm:py-2 rounded-full font-medium transition-all ${isLocked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
+                            className={`p-2 sm:px-4 sm:py-2 rounded-full font-medium transition-all ${isLocked ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                             title={isLocked ? "Unlock Canvas" : "Lock Canvas"}
                         >
                             {isLocked ? <Icons.Lock /> : <Icons.Unlock />}
@@ -660,7 +660,7 @@ function TemplateEditorContent() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Template Name..."
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all dark:text-slate-100 dark:placeholder-slate-500"
                     />
                 </div>
             </header>
@@ -733,21 +733,21 @@ function TemplateEditorContent() {
 
                     {/* Bottom Toolbar */}
                     {image && (
-                        <div className="flex flex-col sm:flex-row justify-between items-center bg-white rounded-2xl p-3 px-6 shadow-sm border border-slate-200 gap-3">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:block">Canvas View</span>
+                        <div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-slate-800 rounded-2xl p-3 px-6 shadow-sm border border-slate-200 dark:border-slate-700 gap-3">
+                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider hidden sm:block">Canvas View</span>
 
                             {/* Mobile Controls Row */}
                             <div className="flex items-center justify-between w-full sm:w-auto gap-2 overflow-x-auto scrollbar-hide py-1">
                                 <button
                                     onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
-                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                                    className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                                 >
                                     <Icons.ZoomOut />
                                 </button>
                                 <span className="text-sm font-bold text-slate-400 py-1.5 px-2 min-w-[3rem] text-center">{Math.round(zoom * 100)}%</span>
                                 <button
                                     onClick={() => setZoom(z => Math.min(2, z + 0.1))}
-                                    className="flex items-center text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                                    className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                                 >
                                     <Icons.ZoomIn />
                                 </button>
@@ -756,7 +756,7 @@ function TemplateEditorContent() {
 
                                 <button
                                     onClick={() => setIsLocked(!isLocked)}
-                                    className={`flex items-center px-3 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap ${isLocked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
+                                    className={`flex items-center px-3 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap ${isLocked ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                                     title={isLocked ? "Unlock Canvas" : "Lock Canvas"}
                                 >
                                     {isLocked ? <Icons.Lock /> : <Icons.Unlock />}
@@ -764,7 +764,7 @@ function TemplateEditorContent() {
                                 </button>
 
                                 <button
-                                    className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors ml-2 whitespace-nowrap"
+                                    className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ml-2 whitespace-nowrap"
                                     onClick={() => {
                                         if (imgRef.current) {
                                             canvasRef.current!.width = imgRef.current.width;
@@ -782,18 +782,18 @@ function TemplateEditorContent() {
 
                 {/* Right: Properties Panel */}
                 <div className="lg:col-span-4 h-full overflow-y-auto pr-1 pb-10 custom-scrollbar">
-                    <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 flex flex-col overflow-hidden min-h-full">
-                        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <h2 className="font-bold text-slate-800">Layers & Properties</h2>
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col overflow-hidden min-h-full">
+                        <div className="p-5 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/80">
+                            <h2 className="font-bold text-slate-800 dark:text-slate-100">Layers & Properties</h2>
                             <button
                                 onClick={addField}
-                                className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-semibold hover:border-indigo-500 hover:text-indigo-600 transition shadow-sm flex items-center"
+                                className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg text-sm font-semibold hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-sm flex items-center"
                             >
                                 <Icons.Plus /> Add Text
                             </button>
                         </div>
 
-                        <div className="p-5 border-b border-slate-100 bg-white flex-1 min-h-0 flex flex-col">
+                        <div className="p-5 border-b border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800 flex-1 min-h-0 flex flex-col">
                             <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Layers
                             </h3>
@@ -809,8 +809,8 @@ function TemplateEditorContent() {
                                             key={field.id}
                                             onClick={() => setSelectedFieldId(field.id)}
                                             className={`p-3 rounded-2xl border cursor-pointer flex justify-between items-center transition-all duration-200 group relative pl-4 ${selectedFieldId === field.id
-                                                ? 'border-indigo-500 bg-indigo-50/50 shadow-md ring-1 ring-indigo-500/20 translate-x-1'
-                                                : 'border-slate-100 hover:border-indigo-300 hover:bg-white hover:shadow-sm'
+                                                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20 shadow-md ring-1 ring-indigo-500/20 translate-x-1'
+                                                : 'border-slate-100 dark:border-slate-700/50 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:bg-white dark:hover:bg-slate-700/50 hover:shadow-sm'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3 overflow-hidden">
@@ -832,14 +832,14 @@ function TemplateEditorContent() {
                         </div>
 
                         {selectedField ? (
-                            <div className="p-6 space-y-6 bg-white animate-in slide-in-from-right-4 duration-300">
+                            <div className="p-6 space-y-6 bg-white dark:bg-slate-800 animate-in slide-in-from-right-4 duration-300">
                                 <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Text Content</label>
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 block">Text Content</label>
                                     <input
                                         type="text"
                                         value={selectedField.label}
                                         onChange={(e) => updateField(selectedField.id, { label: e.target.value })}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700"
+                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-700 dark:text-slate-200"
                                     />
                                 </div>
 

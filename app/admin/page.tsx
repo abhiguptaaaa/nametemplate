@@ -127,71 +127,59 @@ export default function AdminDashboard() {
     // --- Login View ---
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6 relative overflow-hidden font-sans">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-slate-900 dark:to-indigo-950 p-4 transition-colors duration-200">
                 <BackgroundEffects />
-
-                <div className="w-full max-w-md relative z-10">
-                    <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-500/10 border border-white/50 p-8 md:p-10">
-                        <div className="text-center mb-10">
-                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-500/30 mx-auto mb-6">
-                                N
-                            </div>
-                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h1>
-                            <p className="text-slate-500 mt-2 font-medium">Sign in to manage templates</p>
+                <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 rounded-3xl shadow-xl w-full max-w-md border border-white/50 dark:border-slate-700/50 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
+                            <Icons.Lock />
                         </div>
-
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="space-y-1 group">
-                                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Username</label>
-                                <div className="relative flex items-center">
-                                    <div className="absolute left-4"><Icons.User /></div>
-                                    <input
-                                        type="text"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm font-medium text-slate-800 placeholder:text-slate-300"
-                                        placeholder="Admin ID"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1 group">
-                                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Password</label>
-                                <div className="relative flex items-center">
-                                    <div className="absolute left-4"><Icons.Lock /></div>
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm font-medium text-slate-800 placeholder:text-slate-300"
-                                        placeholder="••••••••"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {error && (
-                                <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-center animate-pulse">
-                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-                                    {error}
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                className="w-full bg-slate-900 text-white py-4 rounded-2xl hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all font-bold tracking-wide shadow-lg"
-                            >
-                                Sign In
-                            </button>
-                        </form>
-
-                        <div className="mt-8 text-center pt-6 border-t border-slate-100">
-                            <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-400 hover:text-indigo-600 transition-colors">
-                                <span className="mr-1">←</span> Back to Homepage
-                            </Link>
-                        </div>
+                        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Admin Access</h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Please enter credentials to continue</p>
                     </div>
+
+                    <form onSubmit={handleLogin} className="space-y-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">Username</label>
+                            <div className="relative group">
+                                <span className="absolute left-3 top-2.5">
+                                    <Icons.User />
+                                </span>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all group-hover:border-indigo-300 dark:text-slate-100"
+                                    placeholder="Enter username"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">Password</label>
+                            <div className="relative group">
+                                <span className="absolute left-3 top-2.5">
+                                    <Icons.Lock />
+                                </span>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all group-hover:border-indigo-300 dark:text-slate-100"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+                        {error && (
+                            <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl flex items-center gap-2 animate-shake">
+                                <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                {error}
+                            </div>
+                        )}
+                        <button type="submit" className="w-full py-3 bg-slate-900 dark:bg-indigo-600 text-white rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]">
+                            Login
+                        </button>
+                    </form>
                 </div>
             </div>
         );
@@ -199,11 +187,11 @@ export default function AdminDashboard() {
 
     // --- Dashboard View ---
     return (
-        <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
+        <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
             <BackgroundEffects />
 
             {/* Sticky Header */}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-700/60 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60">
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-700/60 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 transition-colors duration-200">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 relative flex-shrink-0">
@@ -215,14 +203,14 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-3">
                         <Link
                             href="/"
-                            className="hidden md:flex items-center px-4 py-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors rounded-full hover:bg-slate-50"
+                            className="hidden md:flex items-center px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded-full hover:bg-slate-50 dark:hover:bg-slate-800"
                         >
                             <Icons.External /> View Site
                         </Link>
-                        <div className="h-6 w-px bg-slate-200 hidden md:block" />
+                        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block" />
                         <button
                             onClick={handleLogout}
-                            className="flex items-center px-4 py-2 text-sm font-medium text-slate-500 hover:text-red-600 transition-colors rounded-full hover:bg-red-50"
+                            className="flex items-center px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/10"
                         >
                             <Icons.Logout /> Logout
                         </button>
@@ -252,13 +240,13 @@ export default function AdminDashboard() {
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm h-[320px] flex flex-col gap-4">
-                                <div className="w-full h-40 bg-slate-100 rounded-2xl animate-pulse" />
-                                <div className="h-6 w-3/4 bg-slate-100 rounded animate-pulse" />
-                                <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse" />
+                            <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700/50 p-4 shadow-sm h-[320px] flex flex-col gap-4">
+                                <div className="w-full h-40 bg-slate-100 dark:bg-slate-700 rounded-2xl animate-pulse" />
+                                <div className="h-6 w-3/4 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
+                                <div className="h-4 w-1/2 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
                                 <div className="mt-auto flex gap-2">
-                                    <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
-                                    <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
+                                    <div className="h-10 w-full bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse" />
+                                    <div className="h-10 w-full bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse" />
                                 </div>
                             </div>
                         ))}
@@ -280,41 +268,37 @@ export default function AdminDashboard() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {templates.map(template => (
-                            <div key={template.id} className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 border border-slate-200 dark:border-slate-700 flex flex-col">
-                                {/* Preview Image */}
-                                <div className="aspect-[16/9] bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden flex items-center justify-center p-4">
+                            <div key={template.id} className="group bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1">
+                                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                                     <img
                                         src={template.imageUrl}
                                         alt={template.name}
-                                        className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/5 transition-colors" />
                                 </div>
 
-                                {/* Details */}
-                                <div className="p-6 flex flex-col flex-grow">
-                                    <div className="mb-4">
-                                        <h3 className="font-bold text-xl text-slate-900 dark:text-slate-100 mb-1">{template.name}</h3>
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                            {template.fields.length} Dynamic Fields
-                                        </span>
+                                <div className="px-2 mb-6">
+                                    <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1 line-clamp-1">{template.name}</h3>
+                                    <div className="flex items-center text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                        <Icons.Sparkles />
+                                        <span>{template.fields.length} Customizable Fields</span>
                                     </div>
+                                </div>
 
-                                    {/* Action Footer */}
-                                    <div className="mt-auto pt-4 border-t border-slate-50 dark:border-slate-700 grid grid-cols-2 gap-3">
-                                        <Link
-                                            href={`/admin/editor?id=${template.id}`}
-                                            className="flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                        >
-                                            <Icons.Edit /> Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(template.id)}
-                                            className="flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                                        >
-                                            <Icons.Trash /> Delete
-                                        </button>
-                                    </div>
+                                <div className="flex gap-2 mt-auto">
+                                    <Link
+                                        href={`/admin/editor?id=${template.id}`}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-50 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl font-semibold text-sm transition-colors border border-slate-200 dark:border-slate-600 hover:border-indigo-200 dark:hover:border-indigo-700/50"
+                                    >
+                                        <Icons.Edit /> Edit
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(template.id)}
+                                        className="flex items-center justify-center p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-red-500 border border-slate-200 dark:border-slate-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                                    >
+                                        <Icons.Trash />
+                                    </button>
                                 </div>
                             </div>
                         ))}
