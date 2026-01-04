@@ -269,16 +269,21 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             const formData = new FormData();
             formData.append('image', bulkImageFile);
             const res = await fetch('/api/ai/extract-names', { method: 'POST', body: formData });
-            if (!res.ok) throw new Error('Failed');
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server Error: ${res.status}`);
+            }
+
             const data = await res.json();
-            if (data.names && Array.isArray(data.names)) {
+            if (data.names && Array.isArray(data.names) && data.names.length > 0) {
                 setBulkNames(data.names);
             } else {
-                alert('No names found. Try a clearer image.');
+                alert('No names found. Please try a clearer image or a close-up of the list.');
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Extraction failed. Please try again.');
+            alert(`Extraction failed: ${e.message}`);
         } finally {
             setIsBulkExtracting(false);
         }
@@ -386,37 +391,51 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             <BackgroundEffects />
 
             {/* Header */}
-            <header className="fixed w-full top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60">
-                <div className="max-w-[1600px] mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+            <header className="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60">
+                <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
                         <button
                             onClick={() => router.push('/')}
-                            className="p-2 -ml-2 text-slate-500 hover:text-slate-900 hover:bg-black/5 rounded-full transition-all"
+                            className="p-2.5 -ml-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all group"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         </button>
+
                         <div className="flex flex-col">
-                            <h1 className="text-lg md:text-xl font-bold text-slate-900 leading-none mb-1">{template.name}</h1>
-                            <div className="flex items-center gap-2">
-                                <span className="bg-green-100/80 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-green-200 uppercase tracking-wide">Live Editor</span>
+                            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 bg-clip-text text-transparent leading-tight tracking-tight">
+                                {template.name}
+                            </h1>
+                            <div className="flex items-center gap-2 mt-0.5">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span className="text-xs font-semibold text-emerald-600/90 tracking-wide uppercase">Live Editor</span>
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsBulkModalOpen(true)}
-                            className="bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-200 font-medium px-4 py-2.5 rounded-full transition-all flex items-center gap-2 active:scale-95 text-sm"
-                            title="Generate certificates in bulk (Admin)"
+                            className="group relative px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 hover:border-indigo-300 font-semibold rounded-full transition-all flex items-center gap-2 text-sm shadow-sm hover:shadow-md hover:text-indigo-600 active:scale-95"
                         >
                             <BulkIcons.Sparkles />
-                            <span className="hidden sm:inline">Bulk Gen</span>
+                            <span>Bulk Generate</span>
+                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                            </span>
                         </button>
+
+                        <div className="h-8 w-px bg-slate-200 mx-2"></div>
+
                         <button
                             onClick={handleDownload}
-                            className="bg-slate-900 hover:bg-indigo-600 text-white font-medium px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/30 transition-all flex items-center gap-2 active:scale-95"
+                            className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-full shadow-lg shadow-slate-900/20 hover:shadow-slate-900/40 transition-all flex items-center gap-2 active:scale-95 group"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span>Download</span>
+                            <span>Download PDF</span>
+                            <BulkIcons.Download />
                         </button>
                     </div>
                 </div>

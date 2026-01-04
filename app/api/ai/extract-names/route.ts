@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
                     ]
                 }
             ],
-            model: 'llama-3.2-11b-vision-preview',
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
             temperature: 0.1, // Slight temp to allow for better reading of complex fonts? No, 0 is usually best for determinstic extraction. Keeping low. 
             response_format: { type: 'json_object' }
         });
