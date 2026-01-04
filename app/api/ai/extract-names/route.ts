@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
                     content: [
                         {
                             type: 'text',
-                            text: 'Extract EVERY single name found in this image. This is a list of names for certificates. \n\nRules:\n1. Extract all names strictly as they appear.\n2. Ignore row numbers, dates, titles (like "List of Participants"), or other metadata.\n3. Return strictly a valid JSON object with a single key "names" which is an array of strings.\n4. Do not miss any names.\n\nExample Output Format: {"names": ["Name One", "Name Two"]}'
+                            text: 'Extract EVERY single name found in this image along with any contextual text that appears after the name. This is a guest list for invitations/certificates.\n\nRules:\n1. Extract all names exactly as they appear.\n2. If there is additional text after a name (like "with family", "whole family invited", "sa parivar", etc.), include it with the name.\n3. Ignore row numbers, dates, section titles (like "List of Participants"), or other metadata.\n4. Return strictly a valid JSON object with a single key "names" which is an array of strings.\n5. Each entry should be: "Name + contextual text" if present, or just "Name" if no context.\n6. Do not miss any names.\n\nExamples:\n- If image shows: "Pankaj Gupta (whole family)" → extract as "Pankaj Gupta (whole family)"\n- If image shows: "Rahul Sharma sa parivar" → extract as "Rahul Sharma sa parivar"\n- If image shows: "Amit Kumar" → extract as "Amit Kumar"\n\nOutput Format: {"names": ["Name One with context", "Name Two", "Name Three (family invited)"]}'
                         },
                         {
                             type: 'image_url',
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
                 }
             ],
             model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-            temperature: 0.1, // Slight temp to allow for better reading of complex fonts? No, 0 is usually best for determinstic extraction. Keeping low. 
+            temperature: 0.1,
             response_format: { type: 'json_object' }
         });
 
