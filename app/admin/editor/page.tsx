@@ -94,6 +94,7 @@ function TemplateEditorContent() {
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 
     // Zoom State
     const [zoom, setZoom] = useState(1);
@@ -158,6 +159,7 @@ function TemplateEditorContent() {
     // Load template or draft
     useEffect(() => {
         const loadData = async () => {
+            if (id) setIsLoadingTemplate(true);
             const draftKey = `draft_${id || 'new'} `;
 
             // Check for explicit "new" session
@@ -214,7 +216,8 @@ function TemplateEditorContent() {
                             };
                         }
                     })
-                    .catch(console.error);
+                    .catch(console.error)
+                    .finally(() => setIsLoadingTemplate(false));
             }
         };
         loadData();

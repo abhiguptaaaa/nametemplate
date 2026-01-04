@@ -72,7 +72,7 @@ export default function TemplatesPage() {
 
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map(i => (
+                        {[1, 2, 3].map(i => (
                             <div key={i} className="bg-white rounded-3xl h-[400px] border border-slate-100 shadow-sm p-4 space-y-4">
                                 <div className="w-full h-48 bg-slate-100 rounded-2xl animate-pulse" />
                                 <div className="h-6 w-2/3 bg-slate-100 rounded animate-pulse" />
@@ -95,12 +95,12 @@ export default function TemplatesPage() {
                                 className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                             >
                                 {/* Image Container */}
-                                <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
+                                <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden flex items-center justify-center p-4">
                                     <img
                                         src={template.imageUrl}
                                         alt={template.name}
                                         loading="lazy"
-                                        className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                                        className="max-w-full max-h-full object-contain transition-transform duration-700 ease-in-out group-hover:scale-105"
                                     />
                                     <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/10 transition-colors duration-300" />
                                 </div>
