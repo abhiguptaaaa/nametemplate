@@ -614,69 +614,63 @@ function TemplateEditorContent() {
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Top Bar */}
-            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-6 h-16 flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-4">
-                    <Link href="/admin" className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all">
-                        <Icons.Back />
-                    </Link>
-                    <div className="h-6 w-px bg-slate-200" />
-                    <div>
-                        <h1 className="text-lg font-bold text-slate-900 leading-tight">
-                            {id ? 'Edit Template' : 'New Design'}
-                        </h1>
+            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm will-change-transform">
+                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                        <Link href="/admin" className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all flex-shrink-0">
+                            <Icons.Back />
+                        </Link>
+                        <div className="h-6 w-px bg-slate-200 hidden sm:block flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-sm sm:text-lg font-bold text-slate-900 leading-tight truncate">
+                                {id ? 'Edit Template' : 'New Design'}
+                            </h1>
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="hidden md:flex items-center gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <button
                             onClick={() => setIsLocked(!isLocked)}
-                            className={`flex items-center px-4 py-2 rounded-full font-medium transition-all ${isLocked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
+                            className={`p-2 sm:px-4 sm:py-2 rounded-full font-medium transition-all ${isLocked ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'}`}
                             title={isLocked ? "Unlock Canvas" : "Lock Canvas"}
                         >
                             {isLocked ? <Icons.Lock /> : <Icons.Unlock />}
-                            <span className="hidden lg:inline">{isLocked ? 'Locked' : 'Unlocked'}</span>
                         </button>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Template Name..."
-                            className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none w-64 transition-all"
-                        />
+                        <button
+                            onClick={saveTemplate}
+                            disabled={isSaving}
+                            className={`flex items-center bg-indigo-600 text-white px-3 sm:px-5 py-2 rounded-full font-medium shadow-lg shadow-indigo-500/20 transition-all text-sm ${isSaving ? 'opacity-75 cursor-not-allowed' : 'hover:bg-indigo-700 hover:shadow-indigo-500/40 active:scale-95'}`}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span className="ml-2 hidden sm:inline">Saving...</span>
+                                </>
+                            ) : (
+                                <><Icons.Save /> <span className="hidden sm:inline">Save</span><span className="sm:hidden">Save</span></>
+                            )}
+                        </button>
                     </div>
-                    <button
-                        onClick={saveTemplate}
-                        disabled={isSaving}
-                        className={`flex items-center bg-indigo-600 text-white px-5 py-2 rounded-full font-medium shadow-lg shadow-indigo-500/20 transition-all ${isSaving ? 'opacity-75 cursor-not-allowed' : 'hover:bg-indigo-700 hover:shadow-indigo-500/40 active:scale-95'}`}
-                    >
-                        {isSaving ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                Saving changes...
-                            </>
-                        ) : (
-                            <><Icons.Save /> Save Design</>
-                        )}
-                    </button>
+                </div>
+
+                {/* Mobile Template Name Input */}
+                <div className="px-4 pb-3 pt-1 border-t border-slate-100">
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Template Name..."
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                    />
                 </div>
             </header>
 
-            <div className="relative z-10 max-w-[1800px] mx-auto p-4 lg:p-6 lg:h-[calc(100vh-64px)] min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="relative z-10 max-w-[1800px] mx-auto p-3 sm:p-4 lg:p-6 min-h-[calc(100vh-120px)] sm:min-h-[calc(100vh-64px)] grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
 
                 {/* Left: Canvas Area */}
                 <div className="lg:col-span-8 flex flex-col h-full gap-4">
-                    <div className="md:hidden">
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Template Name..."
-                            className="w-full bg-white border border-slate-200 rounded-lg px-4 py-3 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                        />
-                    </div>
 
-                    <div className="flex-1 bg-slate-100/50 backdrop-blur-sm rounded-3xl border border-slate-200/60 shadow-inner relative overflow-hidden flex items-center justify-center p-4 lg:p-8 group min-h-[50vh] lg:min-h-0">
+                    <div className="flex-1 bg-slate-100/50 backdrop-blur-sm rounded-3xl border border-slate-200/60 shadow-inner relative overflow-hidden flex items-center justify-center p-4 lg:p-8 group min-h-[50vh] lg:min-h-0 will-change-transform">
                         <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
                         {/* Image Loading Spinner */}
