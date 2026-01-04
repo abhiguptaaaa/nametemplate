@@ -3,6 +3,37 @@
 import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Template, CustomFont } from '@/lib/storage';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+
+// Inline SVG Icons for Bulk Process
+const BulkIcons = {
+    UploadCloud: () => (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+    ),
+    Loader2: ({ className }: { className?: string }) => (
+        <svg className={className || "w-5 h-5 animate-spin"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+    ),
+    Sparkles: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+    ),
+    Download: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+    ),
+    X: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    )
+};
 
 const BackgroundEffects = () => (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -41,6 +72,14 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const [loading, setLoading] = useState(true);
     const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
     const [hinglishConverterEnabled, setHinglishConverterEnabled] = useState(true); // ON by default
+
+    // Bulk Mode State
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+    const [bulkImageFile, setBulkImageFile] = useState<File | null>(null);
+    const [bulkNames, setBulkNames] = useState<string[]>([]);
+    const [isBulkExtracting, setIsBulkExtracting] = useState(false);
+    const [isBulkGenerating, setIsBulkGenerating] = useState(false);
+    const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
@@ -216,6 +255,112 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
         }
     };
 
+    // Bulk Logic Methods
+    const handleBulkImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setBulkImageFile(e.target.files[0]);
+        }
+    };
+
+    const handleBulkExtract = async () => {
+        if (!bulkImageFile) return;
+        setIsBulkExtracting(true);
+        try {
+            const formData = new FormData();
+            formData.append('image', bulkImageFile);
+            const res = await fetch('/api/ai/extract-names', { method: 'POST', body: formData });
+            if (!res.ok) throw new Error('Failed');
+            const data = await res.json();
+            if (data.names && Array.isArray(data.names)) {
+                setBulkNames(data.names);
+            } else {
+                alert('No names found. Try a clearer image.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Extraction failed. Please try again.');
+        } finally {
+            setIsBulkExtracting(false);
+        }
+    };
+
+    const handleBulkGenerate = async () => {
+        if (!template || bulkNames.length === 0) return;
+
+        // Find "Name" field - robust check
+        const targetField = template.fields.find(f => f.label.toLowerCase().includes('name')) || template.fields[0];
+        if (!targetField) return;
+
+        setIsBulkGenerating(true);
+        setBulkProgress({ current: 0, total: bulkNames.length });
+
+        const zip = new JSZip();
+        // Create a temporary canvas for generation to avoid flickering main canvas
+        const genCanvas = document.createElement('canvas');
+        const genCtx = genCanvas.getContext('2d');
+        if (!genCtx) return;
+
+        const img = new Image();
+        img.src = template.imageUrl;
+        await new Promise(r => img.onload = r);
+        genCanvas.width = img.width;
+        genCanvas.height = img.height;
+
+        // Ensure fonts
+        await document.fonts.ready;
+
+        try {
+            for (let i = 0; i < bulkNames.length; i++) {
+                const name = bulkNames[i];
+
+                // Draw logic (replicated for background processing)
+                genCtx.clearRect(0, 0, genCanvas.width, genCanvas.height);
+                genCtx.drawImage(img, 0, 0);
+
+                template.fields.forEach(field => {
+                    let text = (field.id === targetField.id) ? name : (fieldValues[field.id] || '');
+                    if (!text && field.id !== targetField.id) return; // Skip empty non-target fields
+
+                    genCtx.fillStyle = field.color;
+                    const weight = field.fontWeight || 400;
+                    genCtx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
+                    genCtx.textAlign = field.alignment;
+                    genCtx.textBaseline = 'top';
+
+                    const lineHeight = field.fontSize * (field.lineHeight || 1.2);
+                    const lines = getLines(genCtx, text, field.width);
+
+                    lines.forEach((line, idx) => {
+                        let drawX = field.x;
+                        const lineWidth = genCtx.measureText(line).width;
+                        if (field.alignment === 'center') drawX = field.x + (field.width - lineWidth) / 2;
+                        else if (field.alignment === 'right') drawX = field.x + field.width - lineWidth;
+
+                        genCtx.textAlign = 'left';
+                        genCtx.fillText(line, drawX, field.y + (idx * lineHeight));
+                    });
+                });
+
+                const blob = await new Promise<Blob | null>(r => genCanvas.toBlob(r, 'image/png'));
+                if (blob) {
+                    const safeName = name.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+                    zip.file(`${safeName}_${i}.png`, blob);
+                }
+                setBulkProgress(p => ({ ...p, current: i + 1 }));
+                await new Promise(r => setTimeout(r, 0)); // Yield to UI
+            }
+
+            const content = await zip.generateAsync({ type: 'blob' });
+            saveAs(content, `${template.name}_bulk.zip`);
+            setIsBulkModalOpen(false); // Close modal on success
+        } catch (e) {
+            console.error(e);
+            alert('Generation failed.');
+        } finally {
+            setIsBulkGenerating(false);
+        }
+    };
+
     const handleDownload = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -259,11 +404,11 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     </div>
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => router.push(`/admin/bulk-generate?templateId=${id}`)}
+                            onClick={() => setIsBulkModalOpen(true)}
                             className="bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-200 font-medium px-4 py-2.5 rounded-full transition-all flex items-center gap-2 active:scale-95 text-sm"
                             title="Generate certificates in bulk (Admin)"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                            <BulkIcons.Sparkles />
                             <span className="hidden sm:inline">Bulk Gen</span>
                         </button>
                         <button
@@ -355,7 +500,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                 <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
                                 <canvas
                                     ref={canvasRef}
-                                    className="max-w-full h-auto shadow-2xl shadow-indigo-500/10 rounded-lg scale-[0.98] group-hover:scale-100 transition-transform duration-500 ease-out"
+                                    className="max-w-full h-auto shadow-2xl shadow-indigo-500/10 rounded-lg"
                                 />
                             </div>
                         </div>
@@ -364,6 +509,77 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
 
                 </div>
             </main>
+            {/* Bulk Generation Modal */}
+            {isBulkModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+                        {/* Modal Header */}
+                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                                <span className="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg"><BulkIcons.Sparkles /></span>
+                                Bulk Generate Certificates
+                            </h3>
+                            <button onClick={() => setIsBulkModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition">
+                                <BulkIcons.X />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 overflow-y-auto space-y-6">
+                            {/* Step 1: Upload */}
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700 block">1. Upload List Image</label>
+                                <div className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all ${bulkImageFile ? 'border-emerald-500 bg-emerald-50/10' : 'border-slate-200 hover:border-indigo-400 hover:bg-slate-50'}`}>
+                                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" onChange={handleBulkImageUpload} />
+                                    <div className="flex flex-col items-center pointer-events-none">
+                                        <div className={`mb-2 ${bulkImageFile ? 'text-emerald-500' : 'text-slate-400'}`}><BulkIcons.UploadCloud /></div>
+                                        {bulkImageFile ? (
+                                            <p className="text-sm font-medium text-emerald-700 truncate max-w-[200px]">{bulkImageFile.name}</p>
+                                        ) : (
+                                            <p className="text-sm text-slate-500">Tap to upload image</p>
+                                        )}
+                                    </div>
+                                </div>
+                                {bulkImageFile && !bulkNames.length && (
+                                    <button
+                                        onClick={handleBulkExtract}
+                                        disabled={isBulkExtracting}
+                                        className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-medium text-sm hover:bg-indigo-700 transition flex justify-center items-center gap-2"
+                                    >
+                                        {isBulkExtracting ? <><BulkIcons.Loader2 /> Extracting...</> : 'Extract Names'}
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Step 2: Review */}
+                            {bulkNames.length > 0 && (
+                                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-sm font-semibold text-slate-700">2. Verify Names ({bulkNames.length})</label>
+                                        <button onClick={() => setBulkNames([])} className="text-xs text-red-500 hover:text-red-700 underline">Clear</button>
+                                    </div>
+                                    <textarea
+                                        value={bulkNames.join('\n')}
+                                        onChange={e => setBulkNames(e.target.value.split('\n'))}
+                                        className="w-full h-32 p-3 text-sm border border-slate-200 rounded-xl bg-slate-50/50 focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none font-mono"
+                                    />
+                                    <button
+                                        onClick={handleBulkGenerate}
+                                        disabled={isBulkGenerating}
+                                        className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-500/20 transition flex justify-center items-center gap-2"
+                                    >
+                                        {isBulkGenerating ? (
+                                            <><BulkIcons.Loader2 /> Generating {bulkProgress.current}/{bulkProgress.total}</>
+                                        ) : (
+                                            <><BulkIcons.Download /> Generate ZIP</>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
