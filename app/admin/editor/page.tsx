@@ -526,11 +526,14 @@ function TemplateEditorContent() {
             ctx.fillStyle = field.color;
             const weight = field.fontWeight || 400;
             ctx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
-            ctx.textBaseline = 'top';
+            ctx.textBaseline = 'alphabetic'; // More consistent across browsers than 'top'
 
             const lineHeight = field.fontSize * (field.lineHeight || 1.2);
             const lines = getLines(ctx, field.label, field.width);
             const totalHeight = lines.length * lineHeight;
+
+            // Calculate offset for alphabetic baseline (roughly 0.8 * fontSize from top)
+            const baselineOffset = field.fontSize * 0.8;
 
             lines.forEach((line, index) => {
                 let drawX = field.x;
@@ -548,7 +551,7 @@ function TemplateEditorContent() {
                 // If using standard textAlign, we need to set the point correctly
                 // But since we are calculating lines manually, manual X placement is safer/clearer
                 ctx.textAlign = 'left';
-                ctx.fillText(line, drawX, field.y + (index * lineHeight));
+                ctx.fillText(line, drawX, field.y + baselineOffset + (index * lineHeight));
             });
 
 
