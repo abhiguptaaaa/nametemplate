@@ -949,10 +949,12 @@ function TemplateEditorContent() {
                                         {['left', 'center', 'right'].map((align) => (
                                             <button
                                                 key={align}
+                                            <button
+                                                key={align}
                                                 onClick={() => updateField(selectedField.id, { alignment: align as any })}
                                                 className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all duration-200 ${selectedField.alignment === align
-                                                    ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-indigo-500/10 scale-100 font-bold'
-                                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 scale-95'
+                                                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-indigo-500/10 scale-100 font-bold'
+                                                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 scale-95'
                                                     }`}
                                                 title={`Align ${align.charAt(0).toUpperCase() + align.slice(1)}`}
                                             >
@@ -965,12 +967,12 @@ function TemplateEditorContent() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-10 flex flex-col items-center justify-center text-center h-64 bg-slate-50/50">
-                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                            <div className="p-10 flex flex-col items-center justify-center text-center h-64 bg-slate-50/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                                <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm mb-4">
                                     <span className="text-2xl">👆</span>
                                 </div>
-                                <h3 className="font-bold text-slate-700">No Layer Selected</h3>
-                                <p className="text-sm text-slate-400 mt-1 max-w-[200px]">Click on a text layer in the canvas or list to edit its properties.</p>
+                                <h3 className="font-bold text-slate-700 dark:text-slate-200">No Layer Selected</h3>
+                                <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 max-w-[200px]">Click on a text layer in the canvas or list to edit its properties.</p>
                             </div>
                         )}
                     </div>
@@ -982,7 +984,7 @@ function TemplateEditorContent() {
 
 export default function TemplateEditor() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader /></div>}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900"><Loader /></div>}>
             <TemplateEditorContent />
         </Suspense>
     );

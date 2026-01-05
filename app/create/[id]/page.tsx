@@ -508,21 +508,21 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
 
                     {/* Left Panel: Inputs */}
                     <div className="lg:col-span-4 xl:col-span-3 order-2 lg:order-1 flex flex-col gap-6 lg:sticky lg:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
-                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 p-6 md:p-8">
-                            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 text-sm">✍️</span>
+                        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/60 dark:border-slate-700/60 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 p-6 md:p-8">
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-2">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-sm">✍️</span>
                                 Personalize
                             </h2>
 
                             {/* Hinglish Converter Toggle */}
-                            <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100">
+                            <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/50">
                                 <div className="flex items-center justify-between">
                                     <div className="flex-1">
-                                        <h3 className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
                                             <span className="text-base">🔤</span>
                                             Hinglish to Hindi Converter
                                         </h3>
-                                        <p className="text-xs text-slate-600">Auto-convert English text to Hindi script</p>
+                                        <p className="text-xs text-slate-600 dark:text-slate-400">Auto-convert English text to Hindi script</p>
                                     </div>
                                     <button
                                         onClick={() => setHinglishConverterEnabled(!hinglishConverterEnabled)}
@@ -538,8 +538,8 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                     </button>
                                 </div>
                                 {hinglishConverterEnabled && (
-                                    <div className="mt-3 pt-3 border-t border-indigo-200">
-                                        <p className="text-xs text-indigo-700 font-medium animate-in fade-in duration-300">
+                                    <div className="mt-3 pt-3 border-t border-indigo-200 dark:border-indigo-800/50">
+                                        <p className="text-xs text-indigo-700 dark:text-indigo-300 font-medium animate-in fade-in duration-300">
                                             ✓ Converter is ON - Type in Hinglish (e.g., "namaste" → "नमस्ते")
                                         </p>
                                     </div>
@@ -555,10 +555,10 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                             type="text"
                                             value={fieldValues[field.id]}
                                             onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-all shadow-sm"
+                                            className="block w-full pl-10 pr-3 py-3.5 border border-slate-200 dark:border-slate-600 rounded-xl leading-5 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-all shadow-sm"
                                             placeholder={hinglishConverterEnabled ? `Type in Hinglish or Hindi` : `Enter ${field.label}`}
                                         />
-                                        <label className="absolute -top-2 left-3 inline-block bg-white px-1 text-xs font-bold text-slate-500 group-focus-within:text-indigo-600 transition-colors">
+                                        <label className="absolute -top-2 left-3 inline-block bg-white dark:bg-slate-700 px-1 text-xs font-bold text-slate-500 dark:text-slate-300 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors rounded-sm">
                                             {field.label}
                                         </label>
                                     </div>
@@ -566,17 +566,17 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                             </div>
                         </div>
 
-                        <div className="bg-indigo-600/5 rounded-2xl p-5 border border-indigo-100/50">
-                            <h3 className="text-sm font-bold text-indigo-900 mb-1">Preview Updates Instantly</h3>
-                            <p className="text-xs text-indigo-700/80">Every character you type is immediately rendered on the canvas.</p>
+                        <div className="bg-indigo-600/5 dark:bg-indigo-500/10 rounded-2xl p-5 border border-indigo-100/50 dark:border-indigo-500/20">
+                            <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Preview Updates Instantly</h3>
+                            <p className="text-xs text-indigo-700/80 dark:text-indigo-300/70">Every character you type is immediately rendered on the canvas.</p>
                         </div>
                     </div>
 
                     {/* Right Panel: Canvas */}
                     <div className="lg:col-span-8 xl:col-span-9 order-1 lg:order-2">
-                        <div className="bg-white/50 backdrop-blur rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 p-2 md:p-3 relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-                            <div className="relative bg-slate-100/50 rounded-2xl overflow-hidden border border-slate-200/50 flex flex-col items-center justify-center min-h-[400px]">
+                        <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur rounded-3xl border border-white/60 dark:border-slate-700/60 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 p-2 md:p-3 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-900/20 dark:to-purple-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                            <div className="relative bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl overflow-hidden border border-slate-200/50 dark:border-slate-800/50 flex flex-col items-center justify-center min-h-[400px]">
                                 <canvas
                                     ref={canvasRef}
                                     className="max-w-full h-auto shadow-2xl shadow-indigo-500/10 rounded-lg"
