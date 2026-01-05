@@ -259,13 +259,24 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                 const controller = new AbortController();
                 abortControllerRef.current = controller;
 
-                const transliterated = await transliterateText(value, controller.signal);
+                // Capture the value we're transliterating
+                const valueToTransliterate = value;
+                const transliterated = await transliterateText(valueToTransliterate, controller.signal);
 
-                // Only update if not cancelled (transliterateText returns null on abort)
+                // Only update if:
+                // 1. Translation succeeded (not null)
+                // 2. Current field value is still the same as what we transliterated (user hasn't typed more)
                 if (transliterated !== null) {
-                    setFieldValues(prev => ({ ...prev, [fieldId]: transliterated }));
+                    setFieldValues(prev => {
+                        // Only update if the field value hasn't changed since we started
+                        if (prev[fieldId] === valueToTransliterate) {
+                            return { ...prev, [fieldId]: transliterated };
+                        }
+                        // User has typed more, don't overwrite
+                        return prev;
+                    });
                 }
-            }, 1000); // 1.5s debounce to let user finish sentence
+            }, 1000); // 1s debounce
         }
     };
 
