@@ -194,6 +194,7 @@ function TemplateEditorContent() {
                         };
                     }
                     showToast('Restored unsaved draft', 'success');
+                    setIsLoadingTemplate(false);
                     return; // Skip DB fetch if draft exists
                 } catch (e) {
                     console.error('Failed to parse draft', e);
