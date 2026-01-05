@@ -949,8 +949,6 @@ function TemplateEditorContent() {
                                         {['left', 'center', 'right'].map((align) => (
                                             <button
                                                 key={align}
-                                            <button
-                                                key={align}
                                                 onClick={() => updateField(selectedField.id, { alignment: align as any })}
                                                 className={`flex-1 py-2.5 rounded-lg flex items-center justify-center transition-all duration-200 ${selectedField.alignment === align
                                                     ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-indigo-500/10 scale-100 font-bold'
