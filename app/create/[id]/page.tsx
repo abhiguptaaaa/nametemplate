@@ -90,7 +90,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     // Fetch fonts and template
     useEffect(() => {
         // Fetch Fonts
-        fetch('/api/fonts')
+        fetch('/api/fonts', { cache: 'no-store' })
             .then(res => res.json())
             .then((fonts: CustomFont[]) => {
                 setCustomFonts(fonts);
@@ -450,7 +450,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                     {/* Left Panel: Inputs */}
-                    <div className="lg:col-span-4 xl:col-span-3 order-2 lg:order-1 flex flex-col gap-6 lg:sticky lg:top-28">
+                    <div className="lg:col-span-4 xl:col-span-3 order-2 lg:order-1 flex flex-col gap-6 lg:sticky lg:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
                         <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 p-6 md:p-8">
                             <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                                 <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 text-sm">✍️</span>

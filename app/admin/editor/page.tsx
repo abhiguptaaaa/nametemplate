@@ -134,7 +134,7 @@ function TemplateEditorContent() {
 
     // Load fonts
     useEffect(() => {
-        fetch('/api/fonts')
+        fetch('/api/fonts', { cache: 'no-store' })
             .then(res => res.json())
             .then((fonts: CustomFont[]) => {
                 setCustomFonts(fonts);

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         // This is a free API that converts Hinglish to Hindi
         const url = 'https://inputtools.google.com/request?text=' +
             encodeURIComponent(text) +
-            '&itc=hi-t-i0-und&num=1';
+            '&itc=hi-t-i0-und&num=5&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage';
 
         const response = await fetch(url, {
             method: 'GET',
@@ -34,6 +34,10 @@ export async function POST(req: NextRequest) {
             // data[1] is an array of [original_token, [suggestions], ...]
             const transliterated = data[1]
                 .map((segment: any) => {
+                    // Check if original is just symbols/punctuation
+                    const isSymbol = /^[^\w\u0900-\u097F]+$/.test(segment[0]);
+                    if (isSymbol) return segment[0];
+
                     // Return first suggestion (segment[1][0]) or fallback to original token (segment[0])
                     return (segment[1] && segment[1][0]) ? segment[1][0] : segment[0];
                 })
