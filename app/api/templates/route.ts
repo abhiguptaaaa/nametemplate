@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getGlobalTemplates, saveGlobalTemplate, deleteGlobalTemplate } from '@/lib/db';
 import { Template } from '@/lib/storage';
 
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest) {
     try {
         const template: Template = await req.json();
         await saveGlobalTemplate(template);
+        revalidatePath('/templates'); // Invalidate cache so new template shows up instantly
         return NextResponse.json({ success: true, template });
     } catch (error) {
         console.error('API Error:', error);
@@ -31,6 +33,7 @@ export async function DELETE(req: NextRequest) {
 
     try {
         await deleteGlobalTemplate(id);
+        revalidatePath('/templates'); // Invalidate cache on delete too
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('API Error (DELETE):', error);
