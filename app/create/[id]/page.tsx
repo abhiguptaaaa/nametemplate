@@ -191,8 +191,10 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             const lineHeight = field.fontSize * (field.lineHeight || 1.2);
             const lines = getLines(ctx, text, field.width);
 
-            // Calculate offset for alphabetic baseline (roughly 0.9 * fontSize from top)
-            const baselineOffset = field.fontSize * 0.9;
+            // Responsive offset: Mobile (0.8) vs Desktop (0.9) to match browser rendering differences
+            const isMobile = window.innerWidth < 768;
+            const offsetRatio = isMobile ? 0.8 : 0.9;
+            const baselineOffset = field.fontSize * offsetRatio;
 
             lines.forEach((line, index) => {
                 let drawX = field.x;
@@ -387,8 +389,10 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     const lineHeight = field.fontSize * (field.lineHeight || 1.2);
                     const lines = getLines(genCtx, text, field.width);
 
-                    // Calculate offset for alphabetic baseline (roughly 0.9 * fontSize from top)
-                    const baselineOffset = field.fontSize * 0.9;
+                    // Responsive logic for bulk generation to match screen preview
+                    const isMobile = window.innerWidth < 768;
+                    const offsetRatio = isMobile ? 0.8 : 0.9;
+                    const baselineOffset = field.fontSize * offsetRatio;
 
                     lines.forEach((line, idx) => {
                         let drawX = field.x;
@@ -573,7 +577,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                         <div className="bg-white/50 backdrop-blur rounded-3xl border border-white/60 shadow-xl shadow-slate-200/50 p-2 md:p-3 relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                             <div className="relative bg-slate-100/50 rounded-2xl overflow-hidden border border-slate-200/50 flex flex-col items-center justify-center min-h-[400px]">
-                                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
                                 <canvas
                                     ref={canvasRef}
                                     className="max-w-full h-auto shadow-2xl shadow-indigo-500/10 rounded-lg"

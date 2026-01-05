@@ -534,8 +534,10 @@ function TemplateEditorContent() {
             const lines = getLines(ctx, field.label, field.width);
             const totalHeight = lines.length * lineHeight;
 
-            // Calculate offset for alphabetic baseline (roughly 0.9 * fontSize from top)
-            const baselineOffset = field.fontSize * 0.9;
+            // Responsive offset: Mobile (0.8) vs Desktop (0.9)
+            const isMobile = window.innerWidth < 768;
+            const offsetRatio = isMobile ? 0.8 : 0.9;
+            const baselineOffset = field.fontSize * offsetRatio;
 
             lines.forEach((line, index) => {
                 let drawX = field.x;
