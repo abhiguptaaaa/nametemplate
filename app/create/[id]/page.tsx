@@ -116,8 +116,17 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
         loadFonts();
 
         // Reload fonts when window regains focus (catches admin uploads)
-        const handleFocus = () => loadFonts();
+        const handleFocus = () => {
+            console.log('[FONT DEBUG] Window focused, reloading fonts...');
+            loadFonts();
+        };
         window.addEventListener('focus', handleFocus);
+
+        // Also poll for fonts every 10 seconds as backup
+        const fontInterval = setInterval(() => {
+            console.log('[FONT DEBUG] Polling for font updates...');
+            loadFonts();
+        }, 10000);
 
         // Fetch Template
         fetch('/api/templates')
@@ -156,6 +165,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
 
         return () => {
             window.removeEventListener('focus', handleFocus);
+            clearInterval(fontInterval);
         };
     }, [id]);
 
@@ -206,26 +216,41 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
         }
     }, [fieldValues, template]);
 
-    // Transliterate Hinglish to Hindi
+    // Transliterate Hinglish to Hindi - WORD BY WORD to preserve punctuation
     const transliterateText = async (text: string, signal: AbortSignal) => {
         if (!text || !hinglishConverterEnabled) {
             return text;
         }
 
         try {
-            const response = await fetch('/api/transliterate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text }),
-                signal,
-            });
+            // Split into tokens (words and non-words)
+            const tokens = text.match(/[\w\u0900-\u097F]+|[^\w\u0900-\u097F]+/g) || [text];
+            const transliteratedTokens = [];
 
-            if (!response.ok) {
-                return text;
+            for (const token of tokens) {
+                // Check if token is a word (contains letters)
+                if (/[\w\u0900-\u097F]/.test(token)) {
+                    // It's a word, transliterate it
+                    const response = await fetch('/api/transliterate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: token }),
+                        signal,
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        transliteratedTokens.push(data.transliterated || token);
+                    } else {
+                        transliteratedTokens.push(token);
+                    }
+                } else {
+                    // It's punctuation/whitespace, keep as-is
+                    transliteratedTokens.push(token);
+                }
             }
 
-            const data = await response.json();
-            return data.transliterated || text;
+            return transliteratedTokens.join('');
         } catch (error: any) {
             if (error.name === 'AbortError') {
                 return null; // Request cancelled
