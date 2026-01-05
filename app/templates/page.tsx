@@ -1,9 +1,6 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Template } from '@/lib/storage';
+import { getGlobalTemplates } from '@/lib/db';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Loader } from '@/components/ui/Loader';
 
@@ -32,18 +29,11 @@ const BackgroundEffects = () => (
     </div>
 );
 
-export default function TemplatesPage() {
-    const [templates, setTemplates] = useState<Template[]>([]);
-    const [loading, setLoading] = useState(true);
+export default async function TemplatesPage() {
+    // Server-side fetch: Instant data, no loading spinner on client navigation
+    const templates = await getGlobalTemplates();
+    const loading = false; // Always false since we wait for data
 
-    useEffect(() => {
-        fetch('/api/templates')
-            .then(res => res.json())
-            .then(data => {
-                setTemplates(data);
-                setLoading(false);
-            });
-    }, []);
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
