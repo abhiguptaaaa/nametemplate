@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Template } from '@/lib/storage';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Loader } from '@/components/ui/Loader';
 
 const Icons = {
     Sparkles: () => (
@@ -83,14 +84,8 @@ export default function TemplatesPage() {
                 )}
 
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="bg-white rounded-3xl h-[400px] border border-slate-100 shadow-sm p-4 space-y-4">
-                                <div className="w-full h-48 bg-slate-100 rounded-2xl animate-pulse" />
-                                <div className="h-6 w-2/3 bg-slate-100 rounded animate-pulse" />
-                                <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse" />
-                            </div>
-                        ))}
+                    <div className="flex justify-center items-center py-32">
+                        <Loader />
                     </div>
                 ) : templates.length === 0 ? (
                     <div className="text-center py-32 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">

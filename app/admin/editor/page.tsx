@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Template, TemplateField, CustomFont } from '@/lib/storage';
+import { Loader } from '@/components/ui/Loader';
 
 // --- Icons ---
 const Icons = {
@@ -417,6 +418,7 @@ function TemplateEditorContent() {
                 return;
             }
         }
+        // Explicitly clear selection if no field was hit
         setSelectedFieldId(null);
     };
 
@@ -532,8 +534,8 @@ function TemplateEditorContent() {
             const lines = getLines(ctx, field.label, field.width);
             const totalHeight = lines.length * lineHeight;
 
-            // Calculate offset for alphabetic baseline (roughly 0.8 * fontSize from top)
-            const baselineOffset = field.fontSize * 0.8;
+            // Calculate offset for alphabetic baseline (roughly 0.9 * fontSize from top)
+            const baselineOffset = field.fontSize * 0.9;
 
             lines.forEach((line, index) => {
                 let drawX = field.x;
@@ -976,7 +978,7 @@ function TemplateEditorContent() {
 
 export default function TemplateEditor() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600"></div></div>}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader /></div>}>
             <TemplateEditorContent />
         </Suspense>
     );

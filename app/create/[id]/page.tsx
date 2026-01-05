@@ -191,8 +191,8 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             const lineHeight = field.fontSize * (field.lineHeight || 1.2);
             const lines = getLines(ctx, text, field.width);
 
-            // Calculate offset for alphabetic baseline (roughly 0.8 * fontSize from top)
-            const baselineOffset = field.fontSize * 0.8;
+            // Calculate offset for alphabetic baseline (roughly 0.9 * fontSize from top)
+            const baselineOffset = field.fontSize * 0.9;
 
             lines.forEach((line, index) => {
                 let drawX = field.x;
@@ -382,10 +382,13 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     const weight = field.fontWeight || 400;
                     genCtx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
                     genCtx.textAlign = field.alignment;
-                    genCtx.textBaseline = 'top';
+                    genCtx.textBaseline = 'alphabetic';
 
                     const lineHeight = field.fontSize * (field.lineHeight || 1.2);
                     const lines = getLines(genCtx, text, field.width);
+
+                    // Calculate offset for alphabetic baseline (roughly 0.9 * fontSize from top)
+                    const baselineOffset = field.fontSize * 0.9;
 
                     lines.forEach((line, idx) => {
                         let drawX = field.x;
@@ -394,7 +397,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                         else if (field.alignment === 'right') drawX = field.x + field.width - lineWidth;
 
                         genCtx.textAlign = 'left';
-                        genCtx.fillText(line, drawX, field.y + (idx * lineHeight));
+                        genCtx.fillText(line, drawX, field.y + baselineOffset + (idx * lineHeight));
                     });
                 });
 

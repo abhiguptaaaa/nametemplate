@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Template } from '@/lib/storage';
+import { Loader } from '@/components/ui/Loader';
 
 // --- Shared UI Components ---
 
@@ -238,18 +239,8 @@ export default function AdminDashboard() {
 
                 {/* Content Area */}
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700/50 p-4 shadow-sm h-[320px] flex flex-col gap-4">
-                                <div className="w-full h-40 bg-slate-100 dark:bg-slate-700 rounded-2xl animate-pulse" />
-                                <div className="h-6 w-3/4 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
-                                <div className="h-4 w-1/2 bg-slate-100 dark:bg-slate-700 rounded animate-pulse" />
-                                <div className="mt-auto flex gap-2">
-                                    <div className="h-10 w-full bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse" />
-                                    <div className="h-10 w-full bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse" />
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex justify-center items-center py-32">
+                        <Loader />
                     </div>
                 ) : !loading && templates.length === 0 ? (
                     <div className="text-center py-32 bg-white/60 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto">
