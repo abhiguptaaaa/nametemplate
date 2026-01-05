@@ -58,6 +58,23 @@ const BackgroundEffects = () => (
     </div>
 );
 
+function Toast({ message, type, onClose }: { message: string, type: 'success' | 'error', onClose: () => void }) {
+    return (
+        <div className={`fixed bottom-4 right-4 z-[9999] px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300 ${type === 'success' ? 'bg-indigo-900 text-white' : 'bg-red-500 text-white'
+            }`}>
+            {type === 'success' ? (
+                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            ) : (
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            )}
+            <span className="font-medium">{message}</span>
+            <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    );
+}
+
 // --- Main Component ---
 
 export default function AdminDashboard() {
@@ -67,6 +84,13 @@ export default function AdminDashboard() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+    const showToast = (message: string, type: 'success' | 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     useEffect(() => {
         const auth = sessionStorage.getItem('adminAuth');
@@ -112,16 +136,20 @@ export default function AdminDashboard() {
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) return;
+        setDeletingId(id);
         try {
             const res = await fetch(`/api/templates?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
                 setTemplates(templates.filter(t => t.id !== id));
+                showToast('Template deleted successfully', 'success');
             } else {
-                alert('Failed to delete template');
+                showToast('Failed to delete template', 'error');
             }
         } catch (error) {
             console.error('Delete error:', error);
-            alert('Failed to delete template');
+            showToast('Failed to delete template', 'error');
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -190,6 +218,7 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/10 selection:text-indigo-700 transition-colors duration-200">
             <BackgroundEffects />
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Sticky Header */}
             <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-700/60 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 transition-colors duration-200">
@@ -280,15 +309,20 @@ export default function AdminDashboard() {
                                 <div className="flex gap-2 mt-auto">
                                     <Link
                                         href={`/admin/editor?id=${template.id}`}
-                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-50 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl font-semibold text-sm transition-colors border border-slate-200 dark:border-slate-600 hover:border-indigo-200 dark:hover:border-indigo-700/50"
+                                        className="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-100 hover:text-indigo-700 transition w-full"
                                     >
                                         <Icons.Edit /> Edit
                                     </Link>
                                     <button
                                         onClick={() => handleDelete(template.id)}
-                                        className="flex items-center justify-center p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-red-500 border border-slate-200 dark:border-slate-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                                        disabled={deletingId === template.id}
+                                        className="flex items-center justify-center px-4 py-2 bg-red-50 text-red-500 rounded-xl font-semibold hover:bg-red-100 hover:text-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
                                     >
-                                        <Icons.Trash />
+                                        {deletingId === template.id ? (
+                                            <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                        ) : (
+                                            <><Icons.Trash /> Delete</>
+                                        )}
                                     </button>
                                 </div>
                             </div>
