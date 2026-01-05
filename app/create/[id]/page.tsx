@@ -186,11 +186,13 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
             ctx.fillStyle = field.color;
             const weight = field.fontWeight || 400;
             ctx.font = `${weight} ${field.fontSize}px "${field.fontFamily}"`;
-            ctx.textAlign = field.alignment;
-            ctx.textBaseline = 'top';
+            ctx.textBaseline = 'alphabetic'; // More consistent across browsers than 'top'
 
             const lineHeight = field.fontSize * (field.lineHeight || 1.2);
             const lines = getLines(ctx, text, field.width);
+
+            // Calculate offset for alphabetic baseline (roughly 0.8 * fontSize from top)
+            const baselineOffset = field.fontSize * 0.8;
 
             lines.forEach((line, index) => {
                 let drawX = field.x;
@@ -203,7 +205,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                 }
 
                 ctx.textAlign = 'left';
-                ctx.fillText(line, drawX, field.y + (index * lineHeight));
+                ctx.fillText(line, drawX, field.y + baselineOffset + (index * lineHeight));
             });
         });
     };
