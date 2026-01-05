@@ -95,7 +95,6 @@ function TemplateEditorContent() {
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     // Initialize loading to true if we have an ID to fetch, preventing "empty flash"
     const [isLoadingTemplate, setIsLoadingTemplate] = useState(!!id);
 
