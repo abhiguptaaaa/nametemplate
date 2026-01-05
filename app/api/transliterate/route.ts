@@ -34,14 +34,19 @@ export async function POST(req: NextRequest) {
             // data[1] is an array of [original_token, [suggestions], ...]
             const transliterated = data[1]
                 .map((segment: any) => {
-                    // Check if original is just symbols/punctuation
-                    const isSymbol = /^[^\w\u0900-\u097F]+$/.test(segment[0]);
-                    if (isSymbol) return segment[0];
+                    // Check if original is just symbols/punctuation (including spaces)
+                    const original = segment[0];
+                    const isSymbolOrSpace = /^[^\w\u0900-\u097F]+$/.test(original);
+
+                    if (isSymbolOrSpace) {
+                        // Preserve exact punctuation/whitespace
+                        return original;
+                    }
 
                     // Return first suggestion (segment[1][0]) or fallback to original token (segment[0])
-                    return (segment[1] && segment[1][0]) ? segment[1][0] : segment[0];
+                    return (segment[1] && segment[1][0]) ? segment[1][0] : original;
                 })
-                .join(''); // Join all segments (spaces/punctuation are usually their own segments or included)
+                .join(''); // Join all segments (spaces and punctuation preserved from above)
 
             return NextResponse.json({
                 original: text,

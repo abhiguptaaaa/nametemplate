@@ -88,8 +88,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Fetch fonts and template
-    useEffect(() => {
-        // Fetch Fonts
+    const loadFonts = () => {
         fetch('/api/fonts', { cache: 'no-store' })
             .then(res => res.json())
             .then((fonts: CustomFont[]) => {
@@ -110,6 +109,15 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                 styleEl.textContent = css;
             })
             .catch(console.error);
+    };
+
+    useEffect(() => {
+        // Initial font load
+        loadFonts();
+
+        // Reload fonts when window regains focus (catches admin uploads)
+        const handleFocus = () => loadFonts();
+        window.addEventListener('focus', handleFocus);
 
         // Fetch Template
         fetch('/api/templates')
@@ -145,6 +153,10 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                 }
                 setLoading(false);
             });
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
     }, [id]);
 
     const draw = () => {
