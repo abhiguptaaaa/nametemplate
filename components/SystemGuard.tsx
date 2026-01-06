@@ -43,6 +43,8 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
                     const savedCode = localStorage.getItem('site_access_code');
                     if (savedCode === data.accessCode) {
                         setAccessGranted(true);
+                    } else {
+                        setAccessGranted(false);
                     }
                 } else {
                     setAccessGranted(true);
