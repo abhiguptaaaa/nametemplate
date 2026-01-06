@@ -24,6 +24,7 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
     const [settings, setSettings] = useState<SystemSettings | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [accessGranted, setAccessGranted] = useState(false);
+    const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
     const [accessInput, setAccessInput] = useState('');
     const [error, setError] = useState('');
 
@@ -37,6 +38,12 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
                     if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
                     return data;
                 });
+
+                // Check admin login status
+                const auth = sessionStorage.getItem('adminAuth');
+                if (auth === 'true') {
+                    setIsAdminLoggedIn(true);
+                }
 
                 // Check local access code
                 if (data.accessCodeEnabled) {
@@ -75,8 +82,8 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Always allow admin access
-    if (isAdmin) {
+    // Always allow admin access (URL or Logged State)
+    if (isAdmin || isAdminLoggedIn) {
         return <>{children}</>;
     }
 
