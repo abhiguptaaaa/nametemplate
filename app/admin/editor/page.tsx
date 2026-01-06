@@ -57,6 +57,9 @@ const Icons = {
     Unlock: () => (
         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>
     ),
+    WhatsApp: () => (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.374-5.03c0-5.429 4.417-9.868 9.856-9.868 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.429-4.415 9.869-9.835 9.869" /></svg>
+    ),
     Share: () => (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
     )
@@ -118,6 +121,7 @@ function TemplateEditorContent() {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [resizeStart, setResizeStart] = useState({ width: 0, fontSize: 0, mouseX: 0 });
     const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+    const [whatsappNumber, setWhatsappNumber] = useState('');
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imgRef = useRef<HTMLImageElement | null>(null);
@@ -658,6 +662,41 @@ function TemplateEditorContent() {
         }
     };
 
+    const handleWhatsApp = async () => {
+        if (!whatsappNumber) {
+            showToast('Please enter a WhatsApp number', 'error');
+            return;
+        }
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        try {
+            const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) return;
+
+            // Copy to clipboard first
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                showToast('Image copied! Paste it in the chat.', 'success');
+            } catch (err) {
+                console.warn('Clipboard write failed', err);
+                showToast('Opening WhatsApp...', 'success');
+            }
+
+            // Open WhatsApp
+            const cleanNumber = whatsappNumber.replace(/\D/g, '');
+            window.open(`https://wa.me/${cleanNumber}`, '_blank');
+        } catch (err) {
+            console.error('WhatsApp share error', err);
+            showToast('Failed to process image', 'error');
+        }
+    };
+
     const selectedField = fields.find(f => f.id === selectedFieldId);
     if (!isAuthenticated) return null;
 
@@ -707,7 +746,7 @@ function TemplateEditorContent() {
                                     <span className="ml-2 hidden sm:inline">Saving...</span>
                                 </>
                             ) : (
-                                <><Icons.Save /> <span className="hidden sm:inline">Save</span><span className="sm:hidden">Save</span></>
+                                <><Icons.Save /> <span className="hidden sm:inline">Save</span></>
                             )}
                         </button>
                     </div>
@@ -1024,6 +1063,34 @@ function TemplateEditorContent() {
                                 <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 max-w-[200px]">Click on a text layer in the canvas or list to edit its properties.</p>
                             </div>
                         )}
+                    </div>
+
+                    {/* WhatsApp Quick Share Card */}
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 mt-4">
+                        <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span className="text-[#25D366]"><Icons.WhatsApp /></span> Quick Share
+                        </h3>
+                        <p className="text-xs text-slate-400 mb-3 leading-relaxed">
+                            Send current design to WhatsApp. The image will be copied to your clipboard.
+                        </p>
+                        <div className="flex gap-2">
+                            <div className="flex-1 relative">
+                                <input
+                                    type="tel"
+                                    placeholder="Phone (e.g. 919876543210)"
+                                    value={whatsappNumber}
+                                    onChange={(e) => setWhatsappNumber(e.target.value)}
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[#25D366]/20 focus:border-[#25D366] outline-none transition-all dark:text-slate-100"
+                                />
+                            </div>
+                            <button
+                                onClick={handleWhatsApp}
+                                className="bg-[#25D366] hover:bg-[#20bd5a] text-white p-2.5 rounded-xl transition-colors shadow-lg shadow-[#25D366]/20 flex items-center justify-center"
+                                title="Send to WhatsApp"
+                            >
+                                <svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

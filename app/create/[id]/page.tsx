@@ -34,6 +34,12 @@ const BulkIcons = {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
+    ),
+    WhatsApp: () => (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.374-5.03c0-5.429 4.417-9.868 9.856-9.868 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.429-4.415 9.869-9.835 9.869" /></svg>
+    ),
+    Share: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
     )
 };
 
@@ -74,6 +80,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
     const [loading, setLoading] = useState(true);
     const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
     const [hinglishConverterEnabled, setHinglishConverterEnabled] = useState(true); // ON by default
+    const [whatsappNumber, setWhatsappNumber] = useState('');
 
     // Bulk Mode State
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
@@ -434,6 +441,81 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
         link.click();
     };
 
+    const handleShare = async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        try {
+            const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) {
+                alert('Failed to generate image');
+                return;
+            }
+
+            const file = new File([blob], `${template?.name || 'design'}.png`, { type: 'image/png' });
+            const shareData = {
+                title: template?.name || 'Design',
+                text: 'Check out this design!',
+                files: [file]
+            };
+
+            if (navigator.share && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback to clipboard
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            [blob.type]: blob
+                        })
+                    ]);
+                    alert('Image copied to clipboard');
+                } catch (err) {
+                    console.error('Share fallback failed', err);
+                    alert('Sharing not supported on this device');
+                }
+            }
+        } catch (err) {
+            console.error('Share error:', err);
+        }
+    };
+
+
+    const handleWhatsApp = async () => {
+        if (!whatsappNumber) {
+            alert('Please enter a WhatsApp number');
+            return;
+        }
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        try {
+            const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) return;
+
+            // Copy to clipboard first
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                alert('Image copied! Paste it in the chat.');
+            } catch (err) {
+                console.warn('Clipboard write failed', err);
+                alert('Opening WhatsApp...');
+            }
+
+            // Open WhatsApp
+            const cleanNumber = whatsappNumber.replace(/\D/g, '');
+            window.open(`https://wa.me/${cleanNumber}`, '_blank');
+        } catch (err) {
+            console.error('WhatsApp share error', err);
+            alert('Failed to process image');
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
             <div className="flex flex-col items-center gap-4">
@@ -476,6 +558,13 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                     {/* Right Actions */}
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <ThemeToggle />
+                        <button
+                            onClick={handleShare}
+                            className="p-2 sm:p-2.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition-all"
+                            title="Share"
+                        >
+                            <BulkIcons.Share />
+                        </button>
                         <button
                             onClick={() => setIsBulkModalOpen(true)}
                             className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all active:scale-95 relative"
@@ -569,6 +658,34 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                         <div className="bg-indigo-600/5 dark:bg-indigo-500/10 rounded-2xl p-5 border border-indigo-100/50 dark:border-indigo-500/20">
                             <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Preview Updates Instantly</h3>
                             <p className="text-xs text-indigo-700/80 dark:text-indigo-300/70">Every character you type is immediately rendered on the canvas.</p>
+                        </div>
+
+                        {/* WhatsApp Quick Share Card */}
+                        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/60 dark:border-slate-700/60 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 p-5">
+                            <h3 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <span className="text-[#25D366]"><BulkIcons.WhatsApp /></span> Quick Share
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                                Send current design to WhatsApp. The image will be copied to your clipboard.
+                            </p>
+                            <div className="flex gap-2">
+                                <div className="flex-1 relative">
+                                    <input
+                                        type="tel"
+                                        placeholder="Phone (e.g. 919876543210)"
+                                        value={whatsappNumber}
+                                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[#25D366]/20 focus:border-[#25D366] outline-none transition-all dark:text-slate-100"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleWhatsApp}
+                                    className="bg-[#25D366] hover:bg-[#20bd5a] text-white p-2.5 rounded-xl transition-colors shadow-lg shadow-[#25D366]/20 flex items-center justify-center"
+                                    title="Send to WhatsApp"
+                                >
+                                    <svg className="w-5 h-5 -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
