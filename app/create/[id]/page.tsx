@@ -611,7 +611,6 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                             <span className="text-base">🔤</span>
                                             Hinglish to Hindi Converter
                                         </h3>
-                                        <p className="text-xs text-slate-600 dark:text-slate-400">Auto-convert English text to Hindi script</p>
                                     </div>
                                     <button
                                         onClick={() => setHinglishConverterEnabled(!hinglishConverterEnabled)}
@@ -626,13 +625,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                                         />
                                     </button>
                                 </div>
-                                {hinglishConverterEnabled && (
-                                    <div className="mt-3 pt-3 border-t border-indigo-200 dark:border-indigo-800/50">
-                                        <p className="text-xs text-indigo-700 dark:text-indigo-300 font-medium animate-in fade-in duration-300">
-                                            ✓ Converter is ON - Type in Hinglish (e.g., "namaste" → "नमस्ते")
-                                        </p>
-                                    </div>
-                                )}
+
                             </div>
                             <div className="space-y-5">
                                 {template.fields.map(field => (
@@ -655,10 +648,7 @@ export default function CreateTemplate({ params }: { params: Promise<{ id: strin
                             </div>
                         </div>
 
-                        <div className="bg-indigo-600/5 dark:bg-indigo-500/10 rounded-2xl p-5 border border-indigo-100/50 dark:border-indigo-500/20">
-                            <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Preview Updates Instantly</h3>
-                            <p className="text-xs text-indigo-700/80 dark:text-indigo-300/70">Every character you type is immediately rendered on the canvas.</p>
-                        </div>
+
 
                         {/* WhatsApp Quick Share Card */}
                         <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl border border-white/60 dark:border-slate-700/60 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 p-5">

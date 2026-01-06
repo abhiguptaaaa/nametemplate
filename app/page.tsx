@@ -65,7 +65,7 @@ export default function Home() {
       </div>
 
       {/* Header */}
-      <header className="fixed w-full top-0 z-50 transition-all duration-300 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/50 dark:border-slate-700/50 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60">
+      <header className="fixed w-full top-0 z-50 transition-all duration-300 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border-b border-white/50 dark:border-slate-700/50 shadow-sm supports-[backdrop-filter]:bg-white/20 dark:supports-[backdrop-filter]:bg-slate-900/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group cursor-pointer">
             <div className="w-8 h-8 sm:w-10 sm:h-10 relative flex-shrink-0">
@@ -144,7 +144,7 @@ export default function Home() {
                   <div className="h-32 w-full bg-slate-50 rounded-xl border border-dashed border-slate-200 mt-8"></div>
                 </div>
               </div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-slate-900 dark:bg-indigo-950 rounded-2xl shadow-xl rotate-[6deg] opacity-10 z-0 scale-95"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-slate-900 dark:bg-indigo-950 rounded-2xl shadow-xl rotate-[6deg] opacity-10 z-0 scale-95 animate-pulse-slow"></div>
             </div>
           </div>
         </section>
@@ -162,7 +162,7 @@ export default function Home() {
               { title: "Customize", desc: "Fill in the details. The real-time preview shows you exactly what you get.", icon: <Icons.Step2 /> },
               { title: "Download", desc: "Get your high-quality image instantly, ready to share or print.", icon: <Icons.Step3 /> }
             ].map((step, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-3xl border border-slate-100 shadow-lg shadow-indigo-500/5 hover:shadow-indigo-500/10 transition-all flex flex-col items-center text-center group">
+              <div key={idx} className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg p-8 rounded-3xl border border-white/50 dark:border-slate-700 shadow-lg shadow-indigo-500/5 hover:shadow-indigo-500/10 transition-all flex flex-col items-center text-center group hover:-translate-y-1">
                 <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-6 group-hover:scale-110 transition-transform">
                   {step.icon}
                 </div>
@@ -211,7 +211,7 @@ export default function Home() {
                   <Link
                     key={template.id}
                     href={`/create/${template.id}`}
-                    className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
+                    className="group flex flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98]"
                   >
                     {/* Image Container */}
                     <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden flex items-center justify-center p-4">
@@ -237,7 +237,7 @@ export default function Home() {
                         <span className="ml-2">{template.fields.length} Editable Fields</span>
                       </div>
 
-                      <div className="mt-auto w-full bg-slate-50 text-slate-900 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-200 group-hover:border-indigo-600">
+                      <div className="mt-auto w-full bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 group-hover:border-indigo-600 shadow-sm group-hover:shadow-indigo-500/20 group-active:scale-95">
                         Use Template <Icons.ArrowRight />
                       </div>
                     </div>

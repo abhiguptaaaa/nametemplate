@@ -86,6 +86,12 @@ export default function AdminDashboard() {
     const [error, setError] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [settings, setSettings] = useState({
+        maintenanceMode: false,
+        accessCodeEnabled: false,
+        accessCode: '1234'
+    });
+    const [savingSettings, setSavingSettings] = useState(false);
 
     const showToast = (message: string, type: 'success' | 'error') => {
         setToast({ message, type });
@@ -115,6 +121,37 @@ export default function AdminDashboard() {
             });
     };
 
+    const loadSettings = async () => {
+        try {
+            const res = await fetch('/api/settings');
+            const data = await res.json();
+            setSettings(data);
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+        }
+    };
+
+    const handleSaveSettings = async () => {
+        setSavingSettings(true);
+        try {
+            const res = await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            });
+            if (res.ok) {
+                showToast('Settings saved successfully', 'success');
+            } else {
+                showToast('Failed to save settings', 'error');
+            }
+        } catch (error) {
+            console.error('Save settings error:', error);
+            showToast('Failed to save settings', 'error');
+        } finally {
+            setSavingSettings(false);
+        }
+    };
+
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -122,6 +159,7 @@ export default function AdminDashboard() {
             sessionStorage.setItem('adminAuth', 'true');
             setIsAuthenticated(true);
             loadTemplates();
+            loadSettings();
         } else {
             setError('Invalid username or password');
         }
@@ -266,70 +304,155 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Content Area */}
-                {loading ? (
-                    <div className="flex justify-center items-center py-32">
-                        <Loader />
-                    </div>
-                ) : !loading && templates.length === 0 ? (
-                    <div className="text-center py-32 bg-white/60 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto">
-                        <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-600">
-                            <Icons.Plus />
-                        </div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-2">No templates yet</h3>
-                        <p className="text-slate-500 mb-8 max-w-sm mx-auto">Your library is empty. Create your first certificate or card template to get started.</p>
-                        <Link
-                            href="/admin/editor?new=true"
-                            className="inline-flex items-center px-6 py-3 bg-white border border-slate-300 shadow-sm text-slate-700 font-medium rounded-full hover:bg-slate-50 hover:border-slate-400 transition-all"
-                        >
-                            Create Template
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {templates.map(template => (
-                            <div key={template.id} className="group bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1">
-                                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                                    <img
-                                        src={template.imageUrl}
-                                        alt={template.name}
-                                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/5 transition-colors" />
-                                </div>
 
-                                <div className="px-2 mb-6">
-                                    <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1 line-clamp-1">{template.name}</h3>
-                                    <div className="flex items-center text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                        <Icons.Sparkles />
-                                        <span>{template.fields.length} Customizable Fields</span>
+                <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-6 md:p-8 shadow-sm mb-12 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/20 rounded-bl-full -mr-16 -mt-16 pointer-events-none" />
+
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 relative z-10">
+                        <div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                <span className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg">⚙️</span>
+                                System Configuration
+                            </h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Control access and visibility of the platform.</p>
+                        </div>
+                        <button
+                            onClick={handleSaveSettings}
+                            disabled={savingSettings}
+                            className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-70 flex items-center gap-2"
+                        >
+                            {savingSettings ? (
+                                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
+                            ) : (
+                                <>Save Configuration</>
+                            )}
+                        </button>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 relative z-10">
+                        {/* Maintenance Mode Toggle */}
+                        <div className={`p-5 rounded-2xl border transition-all ${settings.maintenanceMode ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-900/30' : 'bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800'}`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        🚧 Maintenance Mode
+                                        {settings.maintenanceMode && <span className="text-amber-600 text-xs bg-amber-100 px-2 py-0.5 rounded-full">ACTIVE</span>}
+                                    </h4>
+                                    <p className="text-xs text-slate-500 mt-1 max-w-[250px]">
+                                        Hides the website content and shows a "Under Maintenance" screen with contact info. Admin panel remains accessible.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setSettings({ ...settings, maintenanceMode: !settings.maintenanceMode })}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${settings.maintenanceMode ? 'bg-amber-500' : 'bg-slate-300'}`}
+                                >
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${settings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Access Code Toggle */}
+                        <div className={`p-5 rounded-2xl border transition-all ${settings.accessCodeEnabled ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/10 dark:border-indigo-900/30' : 'bg-slate-50 border-slate-200 dark:bg-slate-900/50 dark:border-slate-800'}`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        🔒 Access Code Protection
+                                        {settings.accessCodeEnabled && <span className="text-indigo-600 text-xs bg-indigo-100 px-2 py-0.5 rounded-full">ACTIVE</span>}
+                                    </h4>
+                                    <p className="text-xs text-slate-500 mt-1 max-w-[250px]">
+                                        Restricts access to the entire site. Users must enter the code below to view any content.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setSettings({ ...settings, accessCodeEnabled: !settings.accessCodeEnabled })}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${settings.accessCodeEnabled ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                                >
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-300 ${settings.accessCodeEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+
+                            {settings.accessCodeEnabled && (
+                                <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 block">Access Code</label>
+                                    <input
+                                        type="text"
+                                        value={settings.accessCode}
+                                        onChange={(e) => setSettings({ ...settings, accessCode: e.target.value })}
+                                        className="w-full bg-white dark:bg-slate-900 border border-slate-300/60 dark:border-slate-700 rounded-xl px-4 py-2 text-sm font-mono font-bold tracking-widest text-center focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        placeholder="Enter code"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Content Area */}
+                {
+                    loading ? (
+                        <div className="flex justify-center items-center py-32">
+                            <Loader />
+                        </div>
+                    ) : !loading && templates.length === 0 ? (
+                        <div className="text-center py-32 bg-white/60 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300 max-w-2xl mx-auto">
+                            <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-600">
+                                <Icons.Plus />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">No templates yet</h3>
+                            <p className="text-slate-500 mb-8 max-w-sm mx-auto">Your library is empty. Create your first certificate or card template to get started.</p>
+                            <Link
+                                href="/admin/editor?new=true"
+                                className="inline-flex items-center px-6 py-3 bg-white border border-slate-300 shadow-sm text-slate-700 font-medium rounded-full hover:bg-slate-50 hover:border-slate-400 transition-all"
+                            >
+                                Create Template
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {templates.map(template => (
+                                <div key={template.id} className="group bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1">
+                                    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                        <img
+                                            src={template.imageUrl}
+                                            alt={template.name}
+                                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/5 transition-colors" />
+                                    </div>
+
+                                    <div className="px-2 mb-6">
+                                        <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1 line-clamp-1">{template.name}</h3>
+                                        <div className="flex items-center text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            <Icons.Sparkles />
+                                            <span>{template.fields.length} Customizable Fields</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 mt-auto">
+                                        <Link
+                                            href={`/admin/editor?id=${template.id}`}
+                                            className="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-100 hover:text-indigo-700 transition w-full"
+                                        >
+                                            <Icons.Edit /> Edit
+                                        </Link>
+                                        <button
+                                            onClick={() => handleDelete(template.id)}
+                                            disabled={deletingId === template.id}
+                                            className="flex items-center justify-center px-4 py-2 bg-red-50 text-red-500 rounded-xl font-semibold hover:bg-red-100 hover:text-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
+                                        >
+                                            {deletingId === template.id ? (
+                                                <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                            ) : (
+                                                <><Icons.Trash /> Delete</>
+                                            )}
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div className="flex gap-2 mt-auto">
-                                    <Link
-                                        href={`/admin/editor?id=${template.id}`}
-                                        className="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-100 hover:text-indigo-700 transition w-full"
-                                    >
-                                        <Icons.Edit /> Edit
-                                    </Link>
-                                    <button
-                                        onClick={() => handleDelete(template.id)}
-                                        disabled={deletingId === template.id}
-                                        className="flex items-center justify-center px-4 py-2 bg-red-50 text-red-500 rounded-xl font-semibold hover:bg-red-100 hover:text-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px]"
-                                    >
-                                        {deletingId === template.id ? (
-                                            <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                                        ) : (
-                                            <><Icons.Trash /> Delete</>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </main>
-        </div>
+                            ))}
+                        </div>
+                    )
+                }
+            </main >
+        </div >
     );
 }

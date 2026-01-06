@@ -1,6 +1,18 @@
 import Redis from 'ioredis';
 import { Template, CustomFont } from './storage';
 
+export interface SystemSettings {
+    maintenanceMode: boolean;
+    accessCodeEnabled: boolean;
+    accessCode: string;
+}
+
+const DEFAULT_SETTINGS: SystemSettings = {
+    maintenanceMode: false,
+    accessCodeEnabled: false,
+    accessCode: '1234'
+};
+
 // Initialize Redis client with the connection string from env
 const getClient = () => {
     if (!process.env.REDIS_URL) {
@@ -87,6 +99,31 @@ export async function deleteGlobalFont(id: string): Promise<void> {
         await redis.hdel('fonts', id);
     } catch (error) {
         console.error('Redis Error (deleteFont):', error);
+        throw error;
+    }
+}
+
+
+// --- SETTINGS ---
+
+export async function getGlobalSettings(): Promise<SystemSettings> {
+    if (!redis) return DEFAULT_SETTINGS;
+    try {
+        const settingsStr = await redis.get('system_settings');
+        if (!settingsStr) return DEFAULT_SETTINGS;
+        return JSON.parse(settingsStr);
+    } catch (error) {
+        console.error('Redis Error (getSettings):', error);
+        return DEFAULT_SETTINGS;
+    }
+}
+
+export async function saveGlobalSettings(settings: SystemSettings): Promise<void> {
+    if (!redis) throw new Error('Redis not configured');
+    try {
+        await redis.set('system_settings', JSON.stringify(settings));
+    } catch (error) {
+        console.error('Redis Error (saveSettings):', error);
         throw error;
     }
 }
