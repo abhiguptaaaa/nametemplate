@@ -32,7 +32,11 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
             try {
                 const res = await fetch('/api/settings');
                 const data = await res.json();
-                setSettings(data);
+                // Only update if settings changed to prevent re-renders
+                setSettings(prev => {
+                    if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+                    return data;
+                });
 
                 // Check local access code
                 if (data.accessCodeEnabled) {
@@ -46,7 +50,8 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
             } catch (error) {
                 console.error('Failed to load settings', error);
             } finally {
-                setIsLoading(false);
+                // Only set loading to false on initial load
+                setIsLoading(prev => prev ? false : prev);
             }
         };
 
