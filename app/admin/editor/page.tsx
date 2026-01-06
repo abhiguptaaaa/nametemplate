@@ -56,6 +56,9 @@ const Icons = {
     ),
     Unlock: () => (
         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>
+    ),
+    Share: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
     )
 };
 
@@ -614,6 +617,47 @@ function TemplateEditorContent() {
         }
     };
 
+    const handleShare = async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        try {
+            const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) {
+                showToast('Failed to generate image', 'error');
+                return;
+            }
+
+            const file = new File([blob], `${name || 'design'}.png`, { type: 'image/png' });
+            const shareData = {
+                title: name || 'Design',
+                text: 'Check out this design!',
+                files: [file]
+            };
+
+            if (navigator.share && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+                showToast('Shared successfully', 'success');
+            } else {
+                // Fallback to clipboard
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            [blob.type]: blob
+                        })
+                    ]);
+                    showToast('Image copied to clipboard', 'success');
+                } catch (err) {
+                    console.error('Share fallback failed', err);
+                    showToast('Sharing not supported on this device', 'error');
+                }
+            }
+        } catch (err) {
+            console.error('Share error:', err);
+            showToast('Share failed', 'error');
+        }
+    };
+
     const selectedField = fields.find(f => f.id === selectedFieldId);
     if (!isAuthenticated) return null;
 
@@ -644,6 +688,13 @@ function TemplateEditorContent() {
                             title={isLocked ? "Unlock Canvas" : "Lock Canvas"}
                         >
                             {isLocked ? <Icons.Lock /> : <Icons.Unlock />}
+                        </button>
+                        <button
+                            onClick={handleShare}
+                            className="p-2 sm:px-4 sm:py-2 rounded-full font-medium transition-all bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                            title="Share Design"
+                        >
+                            <Icons.Share /> <span className="hidden sm:inline">Share</span>
                         </button>
                         <button
                             onClick={saveTemplate}
