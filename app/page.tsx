@@ -1,13 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Template } from '@/lib/storage';
-
 import { ThemeToggle } from '@/components/ThemeToggle';
 
-// Inline Icons for better performance without external dependencies
+// --- Icons ---
 const Icons = {
   Sparkles: () => (
     <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
@@ -15,13 +13,8 @@ const Icons = {
     </svg>
   ),
   ArrowRight: () => (
-    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-    </svg>
-  ),
-  FolderOpen: () => (
-    <svg className="w-12 h-12 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
     </svg>
   ),
   Settings: () => (
@@ -31,44 +24,91 @@ const Icons = {
     </svg>
   ),
   Step1: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
   ),
   Step2: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
   ),
   Step3: () => (
-    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+  ),
+  Close: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
   )
 };
 
-export default function Home() {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
+// --- Components ---
 
-  useEffect(() => {
-    fetch('/api/templates')
-      .then(res => res.json())
-      .then(data => {
-        setTemplates(data);
-        setLoading(false);
-      });
-  }, []);
+const HowItWorksModal = ({ onClose }: { onClose: () => void }) => (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    {/* Backdrop */}
+    <div
+      className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300"
+      onClick={onClose}
+    />
+
+    {/* Modal Content */}
+    <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 max-w-4xl w-full border border-white/20 dark:border-slate-700 animate-in zoom-in-95 duration-300 flex flex-col md:flex-row gap-8 overflow-hidden">
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all"
+      >
+        <Icons.Close />
+      </button>
+
+      {/* Visual Side */}
+      <div className="hidden md:flex flex-col justify-center items-center w-1/3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10" />
+        <div className="relative z-10 text-center">
+          <h3 className="text-2xl font-bold text-indigo-900 dark:text-indigo-200 mb-2">Simple Process</h3>
+          <p className="text-indigo-600 dark:text-indigo-400">Three easy steps to your perfect design.</p>
+        </div>
+      </div>
+
+      {/* Steps Side */}
+      <div className="flex-1 space-y-8 py-4">
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">How it Works</h2>
+
+        <div className="space-y-6">
+          {[
+            { title: "Select Template", desc: "Choose from our wide range of professional designs.", icon: <Icons.Step1 />, color: "from-blue-500 to-indigo-500" },
+            { title: "Customize", desc: "Fill in your details and watch the preview update instantly.", icon: <Icons.Step2 />, color: "from-indigo-500 to-purple-500" },
+            { title: "Download", desc: "Export your high-quality image ready for sharing.", icon: <Icons.Step3 />, color: "from-purple-500 to-pink-500" }
+          ].map((step, idx) => (
+            <div key={idx} className="flex items-start gap-4 group">
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
+                <div className="scale-75">{step.icon}</div>
+              </div>
+              <div className="pt-1">
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white">{step.title}</h4>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export default function Home() {
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 selection:bg-indigo-500/10 selection:text-indigo-700 font-sans transition-colors duration-200">
+    <div className="h-screen overflow-hidden bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 selection:bg-indigo-500/10 selection:text-indigo-700 font-sans transition-colors duration-200 flex flex-col">
 
       {/* Decorative Background Mesh */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob" />
-        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-200/40 dark:bg-indigo-900/20 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob animation-delay-2000" />
-        <div className="absolute bottom-[-20%] left-[20%] w-[500px] h-[500px] bg-blue-200/40 dark:bg-blue-900/20 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob animation-delay-4000" />
+        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-[120px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob" />
+        <div className="absolute top-[-10%] left-[-10%] w-[700px] h-[700px] bg-indigo-200/40 dark:bg-indigo-900/20 rounded-full blur-[120px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob animation-delay-2000" />
+        <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-blue-200/40 dark:bg-blue-900/20 rounded-full blur-[120px] opacity-60 mix-blend-multiply dark:mix-blend-lighten animate-blob animation-delay-4000" />
       </div>
 
       {/* Header */}
-      <header className="fixed w-full top-0 z-50 transition-all duration-300 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl border-b border-white/50 dark:border-slate-700/50 shadow-sm supports-[backdrop-filter]:bg-white/20 dark:supports-[backdrop-filter]:bg-slate-900/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group cursor-pointer">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 relative flex-shrink-0">
+      <header className="absolute top-0 w-full z-50">
+        <div className="max-w-7xl mx-auto px-6 h-24 flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+            <div className="w-10 h-10 relative flex-shrink-0 bg-white/20 backdrop-blur-md rounded-xl p-1.5 border border-white/30 shadow-sm transition-transform group-hover:scale-105">
               <Image
                 src="/xcanvas-logo.png"
                 alt="XCanvas Logo"
@@ -77,196 +117,105 @@ export default function Home() {
                 className="object-contain"
               />
             </div>
-            <span className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">XCanvas</span>
+            <span className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">XCanvas</span>
           </Link>
-          <nav className="flex items-center gap-2 sm:gap-3">
+          <nav className="flex items-center gap-4">
             <ThemeToggle />
             <Link
               href="/admin"
-              className="flex items-center px-3 sm:px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full transition-all shadow-sm hover:shadow-md"
+              className="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 rounded-full transition-all hover:bg-white dark:hover:bg-slate-800 shadow-sm hover:shadow-md flex items-center gap-2"
             >
               <Icons.Settings />
-              <span className="hidden md:inline">Dashboard</span>
-              <span className="md:hidden">Admin</span>
+              <span>Dashboard</span>
             </Link>
           </nav>
         </div>
       </header>
 
-      <main className="relative z-10 pt-24 pb-20">
+      {/* Main Content (Hero) */}
+      <main className="flex-1 relative z-10 flex items-center">
+        <div className="max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-16 items-center">
 
-        {/* Hero Section */}
-        <section className="px-6 md:px-10 lg:px-8 max-w-7xl mx-auto mb-20 md:mb-32">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center pt-10 md:pt-20">
-
-            {/* Left Content */}
-            <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
-              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur border border-slate-200/60 rounded-full px-4 py-1.5 shadow-sm mb-8 animate-fade-in-up">
-                <span className="flex relative h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-                </span>
-                <span className="text-sm font-medium text-slate-600">Template Engine v2.0</span>
-              </div>
-
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-[1.1] mb-6">
-                Design <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient-x">Excellence</span> <br />
-                Made Simple.
-              </h1>
-
-              <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                Create professional certificates, ID cards, and social assets in seconds. Select a template, personalize fields, and export.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/templates" className="px-8 py-4 bg-slate-900 dark:bg-indigo-600 text-white rounded-full font-semibold hover:bg-slate-800 dark:hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 text-center">
-                  Browse Templates
-                </Link>
-                <a href="#how-it-works" className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-full font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all hover:border-slate-300 dark:hover:border-slate-600 text-center">
-                  How it Works
-                </a>
-              </div>
+          {/* Left Content */}
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg border border-indigo-100 dark:border-indigo-900/50 rounded-full px-4 py-1.5 shadow-sm mb-8 animate-fade-in-up">
+              <span className="flex relative h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+              </span>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">Template Engine v2.0 Live</span>
             </div>
 
-            {/* Right Abstract Visual (Desktop Only) */}
-            <div className="hidden lg:block relative h-[500px]">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-gradient-to-tr from-white to-slate-50 rounded-2xl border border-white/50 shadow-2xl rotate-[-6deg] z-10 flex flex-col overflow-hidden">
-                <div className="h-32 bg-indigo-50 border-b border-indigo-100 p-6 flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-white shadow-sm"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 w-32 bg-white rounded-full"></div>
-                    <div className="h-3 w-20 bg-white/60 rounded-full"></div>
+            <h1 className="text-5xl sm:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-8">
+              Design <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient-x">Excellence</span> <br />
+              Made Simple.
+            </h1>
+
+            <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0">
+              Create professional certificates, ID cards, and social assets in seconds. No design skills required.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
+              <Link
+                href="/templates"
+                className="group px-8 py-4 bg-slate-900 dark:bg-indigo-600 text-white rounded-full font-bold text-lg hover:bg-slate-800 dark:hover:bg-indigo-700 transition-all shadow-xl hover:shadow-2xl hover:shadow-indigo-500/20 hover:-translate-y-1 active:translate-y-0 active:scale-95 flex items-center justify-center gap-1"
+              >
+                Browse Templates
+                <Icons.ArrowRight />
+              </Link>
+              <button
+                onClick={() => setShowHowItWorks(true)}
+                className="px-8 py-4 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-full font-semibold text-lg hover:bg-white dark:hover:bg-slate-800 transition-all hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 shadow-sm hover:shadow-lg"
+              >
+                How it Works
+              </button>
+            </div>
+          </div>
+
+          {/* Right Visual */}
+          <div className="hidden lg:block relative h-[600px] w-full perspective-1000">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[600px] transition-transform duration-700 hover:rotate-y-12 hover:rotate-x-6">
+              {/* Floating Elements */}
+              <div className="absolute -top-12 -right-12 w-24 h-24 bg-purple-400 rounded-2xl rotate-12 blur-xl opacity-40 animate-pulse"></div>
+              <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-indigo-400 rounded-full blur-xl opacity-40 animate-pulse delay-700"></div>
+
+              {/* Main Card */}
+              <div className="relative w-full h-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-white/50 dark:border-slate-700 overflow-hidden flex flex-col">
+                <div className="h-48 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 p-8 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-grid-slate-200/50 dark:bg-grid-slate-700/30 [mask-image:linear-gradient(0deg,transparent,black)]" />
+                  <div className="w-24 h-24 bg-white dark:bg-slate-700 rounded-full shadow-lg flex items-center justify-center relative z-10">
+                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse-slow" />
                   </div>
                 </div>
-                <div className="p-6 space-y-4">
-                  <div className="h-4 w-3/4 bg-slate-100 rounded-full"></div>
-                  <div className="h-4 w-1/2 bg-slate-100 rounded-full"></div>
-                  <div className="h-32 w-full bg-slate-50 rounded-xl border border-dashed border-slate-200 mt-8"></div>
+                <div className="p-8 space-y-6 flex-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-3xl">
+                  <div className="h-6 w-3/4 bg-slate-100 dark:bg-slate-700 rounded-full" />
+                  <div className="h-4 w-full bg-slate-50 dark:bg-slate-700/50 rounded-full" />
+                  <div className="h-4 w-5/6 bg-slate-50 dark:bg-slate-700/50 rounded-full" />
+                  <div className="mt-8 p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 h-32 flex items-center justify-center">
+                    <span className="text-slate-400 text-sm">Preview Area</span>
+                  </div>
                 </div>
               </div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[500px] bg-slate-900 dark:bg-indigo-950 rounded-2xl shadow-xl rotate-[6deg] opacity-10 z-0 scale-95 animate-pulse-slow"></div>
             </div>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section id="how-it-works" className="px-6 md:px-10 lg:px-8 max-w-7xl mx-auto mb-24 md:mb-32">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">How It Works</h2>
-            <p className="text-slate-500 max-w-md mx-auto">Create stunning visuals in three simple steps.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { title: "Select Template", desc: "Browse our collection of professionally designed templates.", icon: <Icons.Step1 /> },
-              { title: "Customize", desc: "Fill in the details. The real-time preview shows you exactly what you get.", icon: <Icons.Step2 /> },
-              { title: "Download", desc: "Get your high-quality image instantly, ready to share or print.", icon: <Icons.Step3 /> }
-            ].map((step, idx) => (
-              <div key={idx} className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-lg p-8 rounded-3xl border border-white/50 dark:border-slate-700 shadow-lg shadow-indigo-500/5 hover:shadow-indigo-500/10 transition-all flex flex-col items-center text-center group hover:-translate-y-1">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-6 group-hover:scale-110 transition-transform">
-                  {step.icon}
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{step.title}</h3>
-                <p className="text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Templates Grid Section */}
-        <section id="templates" className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-            <div>
-              <h3 className="text-3xl font-bold text-slate-900 mb-2">Featured Templates</h3>
-              <p className="text-slate-500">Choose a design to start customizing.</p>
-            </div>
-
-            {!loading && templates.length > 0 && (
-              <div className="bg-white px-4 py-2 rounded-full border border-slate-200 text-sm font-medium text-slate-600 shadow-sm">
-                {templates.length} Available Designs
-              </div>
-            )}
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-3xl h-[400px] border border-slate-100 shadow-sm p-4 space-y-4">
-                  <div className="w-full h-48 bg-slate-100 rounded-2xl animate-pulse" />
-                  <div className="h-6 w-2/3 bg-slate-100 rounded animate-pulse" />
-                  <div className="h-4 w-1/2 bg-slate-100 rounded animate-pulse" />
-                </div>
-              ))}
-            </div>
-          ) : templates.length === 0 ? (
-            <div className="text-center py-32 bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-300">
-              <Icons.FolderOpen />
-              <h3 className="text-xl font-bold text-slate-900">No Templates Found</h3>
-              <p className="text-slate-500 mt-2 max-w-sm mx-auto">It looks quiet here. Check back later or ask an admin to upload new designs.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                {templates.slice(0, 3).map((template, idx) => (
-                  <Link
-                    key={template.id}
-                    href={`/create/${template.id}`}
-                    className="group flex flex-col bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1 active:scale-[0.98]"
-                  >
-                    {/* Image Container */}
-                    <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden flex items-center justify-center p-4">
-                      <img
-                        src={template.imageUrl}
-                        alt={template.name}
-                        className="max-w-full max-h-full object-contain transition-transform duration-700 ease-in-out group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/10 transition-colors duration-300" />
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="p-6 flex flex-col flex-grow">
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-bold text-xl text-slate-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">{template.name}</h3>
-                        {idx < 2 && (
-                          <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-indigo-100">New</span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center text-sm text-slate-500 mb-6">
-                        <Icons.Sparkles />
-                        <span className="ml-2">{template.fields.length} Editable Fields</span>
-                      </div>
-
-                      <div className="mt-auto w-full bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 font-bold py-3 px-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 group-hover:border-indigo-600 shadow-sm group-hover:shadow-indigo-500/20 group-active:scale-95">
-                        Use Template <Icons.ArrowRight />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="text-center">
-                <Link href="/templates" className="inline-flex items-center gap-2 text-slate-900 font-bold hover:text-indigo-600 transition-colors border-b-2 border-slate-200 hover:border-indigo-600 pb-1">
-                  View All Designs <Icons.ArrowRight />
-                </Link>
-              </div>
-            </>
-          )}
-        </section>
-      </main>
-
-      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 sm:py-12 relative z-10 transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 dark:text-slate-400 text-sm text-center md:text-left">© {new Date().getFullYear()} XCanvas. All rights reserved.</p>
-          <p className="text-slate-600 dark:text-slate-300 text-sm font-medium flex items-center gap-1">
-            Created with <span className="text-red-500 animate-pulse">♥</span> by <span className="font-bold text-indigo-600 dark:text-indigo-400">Abhi Gupta</span>
-          </p>
-          <div className="flex gap-4 sm:gap-6">
-            <Link href="/privacy" className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm font-medium">Privacy</Link>
-            <Link href="/terms" className="text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm font-medium">Terms</Link>
           </div>
         </div>
+      </main>
+
+      {/* Footer (Minimal) */}
+      <footer className="absolute bottom-6 w-full text-center z-10">
+        <div className="flex items-center justify-center gap-6 text-sm font-medium text-slate-400 dark:text-slate-500">
+          <Link href="/privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy</Link>
+          <span>•</span>
+          <p className="flex items-center gap-1">
+            Created with <span className="text-red-500">♥</span> by <span className="text-slate-600 dark:text-slate-300">Abhi Gupta</span>
+          </p>
+          <span>•</span>
+          <Link href="/terms" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms</Link>
+        </div>
       </footer>
+
+      {/* Modals */}
+      {showHowItWorks && <HowItWorksModal onClose={() => setShowHowItWorks(false)} />}
     </div>
   );
 }
