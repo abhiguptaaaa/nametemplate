@@ -130,6 +130,9 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
 
     // Access Code Protection
     if (settings?.accessCodeEnabled && !accessGranted) {
+        const phoneNumber = '9238868090';
+        const whatsappLink = `https://wa.me/${phoneNumber}`;
+
         return (
             <div className="min-h-screen bg-[#FAFAFA] dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
                 {/* Minimal Header for Admin Access */}
@@ -177,6 +180,19 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             </button>
                         </form>
+
+                        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700/50">
+                            <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Need Access?</p>
+                            <a
+                                href={whatsappLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 rounded-xl font-semibold transition-all"
+                            >
+                                <WhatsAppIcon />
+                                <span>Contact on WhatsApp</span>
+                            </a>
+                        </div>
                     </div>
                 </main>
             </div>
