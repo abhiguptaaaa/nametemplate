@@ -51,6 +51,10 @@ export function SystemGuard({ children }: { children: React.ReactNode }) {
         };
 
         checkSettings();
+
+        // Poll every 5 seconds
+        const interval = setInterval(checkSettings, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const handleAccessSubmit = (e: React.FormEvent) => {
