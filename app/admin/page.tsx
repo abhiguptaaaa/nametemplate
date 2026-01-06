@@ -103,6 +103,7 @@ export default function AdminDashboard() {
         if (auth === 'true') {
             setIsAuthenticated(true);
             loadTemplates();
+            loadSettings();
         } else {
             setLoading(false);
         }
